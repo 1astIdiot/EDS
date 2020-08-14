@@ -1,8 +1,33 @@
 var isPluginEnabled = false;
-var fileContent; // РџРµСЂРµРјРµРЅРЅР°СЏ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РёРЅС„РѕСЂРјР°С†РёРё РёР· С„Р°Р№Р»Р°, Р·РЅР°С‡РµРЅРёРµ РїСЂРёСЃРІР°РёРІР°РµС‚СЃСЏ РІ cades_bes_file.html
+var fileContent = []; // Переменная для хранения информации из файла, значение присваивается в cades_bes_file.html
 var global_selectbox_container = new Array();
 var global_isFromCont = new Array();
 var global_selectbox_counter = 0;
+var sigArray = [];
+var timeSum = 0;
+
+function sendSigArray(sig, name) {
+    var json = JSON.stringify({
+        "base64":sig,
+        "fileName":"D:\\ECP\\" + name + ".sig"
+    });
+
+    let xhr = new XMLHttpRequest();
+    // xhr.setRequestHeader('Access-Control-Allow-Origin', 'http://localhost:63342');
+    xhr.open('POST', 'http://localhost:8098/api/bregis/sign/saveSign', true);
+    try {
+        xhr.send(json);
+        xhr.onload = function() {
+            console.log("файл " + name + " загружен");
+        }
+    }
+    catch(err) {
+        console.log('ИИИ тут ошибка:');
+        console.log(err);
+    }
+
+}
+
 function getXmlHttp(){
     var xmlhttp;
     try {
@@ -177,6 +202,7 @@ function FillCertInfo_NPAPI(certificate, certBoxId, isFromContainer)
     var field_prefix;
     if(typeof(certBoxId) == 'undefined' || certBoxId == "CertListBox")
     {
+        alert('KekSync');
         BoxId = 'cert_info';
         field_prefix = '';
     }else if (certBoxId == "CertListBox1") {
@@ -193,8 +219,8 @@ function FillCertInfo_NPAPI(certificate, certBoxId, isFromContainer)
     var ValidToDate = new Date(certificate.ValidToDate);
     var ValidFromDate = new Date(certificate.ValidFromDate);
     var IsValid = false;
-    //РµСЃР»Рё РїРѕРїР°РґРµС‚СЃСЏ СЃРµСЂС‚РёС„РёРєР°С‚ СЃ РЅРµРёР·РІРµСЃС‚РЅС‹Рј Р°Р»РіРѕСЂРёС‚РјРѕРј
-    //С‚СѓС‚ Р±СѓРґРµС‚ РёСЃРєР»СЋС‡РµРЅРёРµ. Р’ С‚Р°РєРѕРј СЃРµСЂС‚РёС„РёРєР°С‚Рµ РїСЂРѕСЃС‚Рѕ РїСЂРѕРїСѓСЃРєР°РµРј С‚Р°РєРѕРµ РїРѕР»Рµ
+    //если попадется сертификат с неизвестным алгоритмом
+    //тут будет исключение. В таком сертификате просто пропускаем такое поле
     try {
         IsValid = certificate.IsValid().Result;
     } catch (e) {
@@ -205,40 +231,40 @@ function FillCertInfo_NPAPI(certificate, certBoxId, isFromContainer)
 
     var certObj = new CertificateObj(certificate);
     document.getElementById(BoxId).style.display = '';
-    document.getElementById(field_prefix + "subject").innerHTML = "Р’Р»Р°РґРµР»РµС†: <b>" + certObj.GetCertName() + "<b>";
-    document.getElementById(field_prefix + "issuer").innerHTML = "РР·РґР°С‚РµР»СЊ: <b>" + certObj.GetIssuer() + "<b>";
-    document.getElementById(field_prefix + "from").innerHTML = "Р’С‹РґР°РЅ: <b>" + certObj.GetCertFromDate() + " UTC<b>";
-    document.getElementById(field_prefix + "till").innerHTML = "Р”РµР№СЃС‚РІРёС‚РµР»РµРЅ РґРѕ: <b>" + certObj.GetCertTillDate() + " UTC<b>";
+    document.getElementById(field_prefix + "subject").innerHTML = "Владелец: <b>" + certObj.GetCertName() + "<b>";
+    document.getElementById(field_prefix + "issuer").innerHTML = "Издатель: <b>" + certObj.GetIssuer() + "<b>";
+    document.getElementById(field_prefix + "from").innerHTML = "Выдан: <b>" + certObj.GetCertFromDate() + " UTC<b>";
+    document.getElementById(field_prefix + "till").innerHTML = "Действителен до: <b>" + certObj.GetCertTillDate() + " UTC<b>";
     if (hasPrivateKey) {
-        document.getElementById(field_prefix + "provname").innerHTML = "РљСЂРёРїС‚РѕРїСЂРѕРІР°Р№РґРµСЂ: <b>" + certObj.GetPrivateKeyProviderName() + "<b>";
+        document.getElementById(field_prefix + "provname").innerHTML = "Криптопровайдер: <b>" + certObj.GetPrivateKeyProviderName() + "<b>";
         try {
             var privateKeyLink = certObj.GetPrivateKeyLink();
-            document.getElementById(field_prefix + "privateKeyLink").innerHTML = "РЎСЃС‹Р»РєР° РЅР° Р·Р°РєСЂС‹С‚С‹Р№ РєР»СЋС‡: <b>" + privateKeyLink + "<b>";
+            document.getElementById(field_prefix + "privateKeyLink").innerHTML = "Ссылка на закрытый ключ: <b>" + privateKeyLink + "<b>";
         } catch (e) {
-            document.getElementById(field_prefix + "privateKeyLink").innerHTML = "РЎСЃС‹Р»РєР° РЅР° Р·Р°РєСЂС‹С‚С‹Р№ РєР»СЋС‡: <b> РќР°Р±РѕСЂ РєР»СЋС‡РµР№ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚<b>";
+            document.getElementById(field_prefix + "privateKeyLink").innerHTML = "Ссылка на закрытый ключ: <b> Набор ключей не существует<b>";
         }
     } else {
-        document.getElementById(field_prefix + "provname").innerHTML = "РљСЂРёРїС‚РѕРїСЂРѕРІР°Р№РґРµСЂ:<b>";
-        document.getElementById(field_prefix + "privateKeyLink").innerHTML = "РЎСЃС‹Р»РєР° РЅР° Р·Р°РєСЂС‹С‚С‹Р№ РєР»СЋС‡:<b>";
+        document.getElementById(field_prefix + "provname").innerHTML = "Криптопровайдер:<b>";
+        document.getElementById(field_prefix + "privateKeyLink").innerHTML = "Ссылка на закрытый ключ:<b>";
     }
 
-    document.getElementById(field_prefix + "algorithm").innerHTML = "РђР»РіРѕСЂРёС‚Рј РєР»СЋС‡Р°: <b>" + certObj.GetPubKeyAlgorithm() + "<b>";
+    document.getElementById(field_prefix + "algorithm").innerHTML = "Алгоритм ключа: <b>" + certObj.GetPubKeyAlgorithm() + "<b>";
     if(Now < ValidFromDate) {
-        document.getElementById(field_prefix + "status").innerHTML = "РЎС‚Р°С‚СѓСЃ: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>РЎСЂРѕРє РґРµР№СЃС‚РІРёСЏ РЅРµ РЅР°СЃС‚СѓРїРёР»</b></span>";
+        document.getElementById(field_prefix + "status").innerHTML = "Статус: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>Срок действия не наступил</b></span>";
     } else if( Now > ValidToDate){
-        document.getElementById(field_prefix + "status").innerHTML = "РЎС‚Р°С‚СѓСЃ: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>РЎСЂРѕРє РґРµР№СЃС‚РІРёСЏ РёСЃС‚РµРє</b></span>";
+        document.getElementById(field_prefix + "status").innerHTML = "Статус: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>Срок действия истек</b></span>";
     } else if( !hasPrivateKey ){
-        document.getElementById(field_prefix + "status").innerHTML = "РЎС‚Р°С‚СѓСЃ: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>РќРµС‚ РїСЂРёРІСЏР·РєРё Рє Р·Р°РєСЂС‹С‚РѕРјСѓ РєР»СЋС‡Сѓ</b></span>";
+        document.getElementById(field_prefix + "status").innerHTML = "Статус: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>Нет привязки к закрытому ключу</b></span>";
     } else if( !IsValid ){
-        document.getElementById(field_prefix + "status").innerHTML = "РЎС‚Р°С‚СѓСЃ: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>РћС€РёР±РєР° РїСЂРё РїСЂРѕРІРµСЂРєРµ С†РµРїРѕС‡РєРё СЃРµСЂС‚РёС„РёРєР°С‚РѕРІ</b></span>";
+        document.getElementById(field_prefix + "status").innerHTML = "Статус: <span style=\"color:red; font-weight:bold; font-size:16px\"><b>Ошибка при проверке цепочки сертификатов</b></span>";
     } else {
-        document.getElementById(field_prefix + "status").innerHTML = "РЎС‚Р°С‚СѓСЃ: <b> Р”РµР№СЃС‚РІРёС‚РµР»РµРЅ<b>";
+        document.getElementById(field_prefix + "status").innerHTML = "Статус: <b> Действителен<b>";
     }
     if(isFromContainer)
     {
-        document.getElementById(field_prefix + "location").innerHTML = "РЈСЃС‚Р°РЅРѕРІР»РµРЅ РІ С…СЂР°РЅРёР»РёС‰Рµ: <b>РќРµС‚</b>";
+        document.getElementById(field_prefix + "location").innerHTML = "Установлен в хранилище: <b>Нет</b>";
     } else {
-        document.getElementById(field_prefix + "location").innerHTML = "РЈСЃС‚Р°РЅРѕРІР»РµРЅ РІ С…СЂР°РЅРёР»РёС‰Рµ: <b>Р”Р°</b>";
+        document.getElementById(field_prefix + "location").innerHTML = "Установлен в хранилище: <b>Да</b>";
     }
 }
 
@@ -273,7 +299,7 @@ function MakeCadesBesSign_NPAPI(dataToSign, certObject, setDisplayData, isBase64
     var Signature;
 
     if (dataToSign) {
-        // Р”Р°РЅРЅС‹Рµ РЅР° РїРѕРґРїРёСЃСЊ РІРІРµР»Рё
+        // Данные на подпись ввели
         oSignedData.ContentEncoding = 1; //CADESCOM_BASE64_TO_BINARY
         if(typeof(setDisplayData) != 'undefined')
         {
@@ -290,7 +316,7 @@ function MakeCadesBesSign_NPAPI(dataToSign, certObject, setDisplayData, isBase64
             Signature = oSignedData.SignCades(oSigner, CADES_BES);
         }
         catch (err) {
-            errormes = "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РїРѕРґРїРёСЃСЊ РёР·-Р·Р° РѕС€РёР±РєРё: " + cadesplugin.getLastError(err);
+            errormes = "Не удалось создать подпись из-за ошибки: " + cadesplugin.getLastError(err);
             alert(cadesplugin.getLastError(err));
             throw errormes;
         }
@@ -328,7 +354,7 @@ function MakeCadesEnhanced_NPAPI(dataToSign, tspService, certObject, sign_type) 
     var Signature;
 
     if (dataToSign) {
-        // Р”Р°РЅРЅС‹Рµ РЅР° РїРѕРґРїРёСЃСЊ РІРІРµР»Рё
+        // Данные на подпись ввели
         oSignedData.Content = dataToSign;
         oSigner.Options = 1; //CAPICOM_CERTIFICATE_INCLUDE_WHOLE_CHAIN
         oSigner.TSAAddress = tspService;
@@ -336,7 +362,7 @@ function MakeCadesEnhanced_NPAPI(dataToSign, tspService, certObject, sign_type) 
             Signature = oSignedData.SignCades(oSigner, sign_type);
         }
         catch (err) {
-            errormes = "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РїРѕРґРїРёСЃСЊ РёР·-Р·Р° РѕС€РёР±РєРё: " + cadesplugin.getLastError(err);
+            errormes = "Не удалось создать подпись из-за ошибки: " + cadesplugin.getLastError(err);
             alert(errormes);
             throw errormes;
         }
@@ -368,20 +394,20 @@ function MakeXMLSign_NPAPI(dataToSign, certObject, signatureType) {
     var pubKey = certObject.PublicKey();
     var algo = pubKey.Algorithm;
     var algoOid = algo.Value;
-    if (algoOid == "1.2.643.7.1.1.1.1") {   // Р°Р»РіРѕСЂРёС‚Рј РїРѕРґРїРёСЃРё Р“РћРЎРў Р  34.10-2012 СЃ РєР»СЋС‡РѕРј 256 Р±РёС‚
+    if (algoOid == "1.2.643.7.1.1.1.1") {   // алгоритм подписи ГОСТ Р 34.10-2012 с ключом 256 бит
         signMethod = "urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr34102012-gostr34112012-256";
         digestMethod = "urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr34112012-256";
     }
-    else if (algoOid == "1.2.643.7.1.1.1.2") {   // Р°Р»РіРѕСЂРёС‚Рј РїРѕРґРїРёСЃРё Р“РћРЎРў Р  34.10-2012 СЃ РєР»СЋС‡РѕРј 512 Р±РёС‚
+    else if (algoOid == "1.2.643.7.1.1.1.2") {   // алгоритм подписи ГОСТ Р 34.10-2012 с ключом 512 бит
         signMethod = "urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr34102012-gostr34112012-512";
         digestMethod = "urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr34112012-512";
     }
-    else if (algoOid == "1.2.643.2.2.19") {  // Р°Р»РіРѕСЂРёС‚Рј Р“РћРЎРў Р  34.10-2001
+    else if (algoOid == "1.2.643.2.2.19") {  // алгоритм ГОСТ Р 34.10-2001
         signMethod = "urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr34102001-gostr3411";
         digestMethod = "urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr3411";
     }
     else {
-        errormes = "Р”Р°РЅРЅР°СЏ РґРµРјРѕ СЃС‚СЂР°РЅРёС†Р° РїРѕРґРґРµСЂР¶РёРІР°РµС‚ XML РїРѕРґРїРёСЃСЊ СЃРµСЂС‚РёС„РёРєР°С‚Р°РјРё СЃ Р°Р»РіРѕСЂРёС‚РјРѕРј Р“РћРЎРў Р  34.10-2012, Р“РћРЎРў Р  34.10-2001";
+        errormes = "Данная демо страница поддерживает XML подпись сертификатами с алгоритмом ГОСТ Р 34.10-2012, ГОСТ Р 34.10-2001";
         throw errormes;
     }
 
@@ -409,7 +435,7 @@ function MakeXMLSign_NPAPI(dataToSign, certObject, signatureType) {
         sSignedMessage = oSignedXML.Sign(oSigner);
     }
     catch (err) {
-        errormes = "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕР·РґР°С‚СЊ РїРѕРґРїРёСЃСЊ РёР·-Р·Р° РѕС€РёР±РєРё: " + cadesplugin.getLastError(err);
+        errormes = "Не удалось создать подпись из-за ошибки: " + cadesplugin.getLastError(err);
         alert(errormes);
         throw errormes;
     }
@@ -453,14 +479,14 @@ function SignCadesBES_NPAPI(certListBoxId, data, setDisplayData) {
         document.getElementById("SignatureTxtBox").innerHTML = signature;
         if(x!=null)
         {
-            x.innerHTML = "РџРѕРґРїРёСЃСЊ СЃС„РѕСЂРјРёСЂРѕРІР°РЅР° СѓСЃРїРµС€РЅРѕ:";
+            x.innerHTML = "Подпись сформирована успешно 1s";
         }
     }
     catch(err)
     {
         if(x!=null)
         {
-            x.innerHTML = "Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР°:";
+            x.innerHTML = "Возникла ошибка:";
         }
         document.getElementById("SignatureTxtBox").innerHTML = err;
     }
@@ -468,22 +494,22 @@ function SignCadesBES_NPAPI(certListBoxId, data, setDisplayData) {
 
 function SignCadesBES_NPAPI_File(certListBoxId) {
     var certificate = GetCertificate_NPAPI(certListBoxId);
-    var dataToSign = fileContent;
+    var dataToSign = fileContent[0];
     var x = GetSignatureTitleElement();
     try {
         var StartTime = Date.now();
         var setDisplayData;
         var signature = MakeCadesBesSign_NPAPI(dataToSign, certificate, setDisplayData, 1);
         var EndTime = Date.now();
-        document.getElementsByName('TimeTitle')[0].innerHTML = "Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ: " + (EndTime - StartTime) + " РјСЃ";
+        document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + (EndTime - StartTime) + " мс";
         document.getElementById("SignatureTxtBox").innerHTML = signature;
         if (x != null) {
-            x.innerHTML = "РџРѕРґРїРёСЃСЊ СЃС„РѕСЂРјРёСЂРѕРІР°РЅР° СѓСЃРїРµС€РЅРѕ:";
+            x.innerHTML = "Подпись сформирована успешно 2s";
         }
     }
     catch (err) {
         if (x != null) {
-            x.innerHTML = "Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР°:";
+            x.innerHTML = "Возникла ошибка:";
         }
         document.getElementById("SignatureTxtBox").innerHTML = err;
     }
@@ -500,14 +526,14 @@ function SignCadesEnhanced_NPAPI(certListBoxId, sign_type) {
         document.getElementById("SignatureTxtBox").innerHTML = signature;
         if(x!=null)
         {
-            x.innerHTML = "РџРѕРґРїРёСЃСЊ СЃС„РѕСЂРјРёСЂРѕРІР°РЅР° СѓСЃРїРµС€РЅРѕ:";
+            x.innerHTML = "Подпись сформирована успешно 3s";
         }
     }
     catch(err)
     {
         if(x!=null)
         {
-            x.innerHTML = "Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР°:";
+            x.innerHTML = "Возникла ошибка:";
         }
         document.getElementById("SignatureTxtBox").innerHTML = err;
     }
@@ -524,14 +550,14 @@ function SignCadesXML_NPAPI(certListBoxId, signatureType) {
 
         if(x!=null)
         {
-            x.innerHTML = "РџРѕРґРїРёСЃСЊ СЃС„РѕСЂРјРёСЂРѕРІР°РЅР° СѓСЃРїРµС€РЅРѕ:";
+            x.innerHTML = "Подпись сформирована успешно 4s";
         }
     }
     catch(err)
     {
         if(x!=null)
         {
-            x.innerHTML = "Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР°:";
+            x.innerHTML = "Возникла ошибка:";
         }
         document.getElementById("SignatureTxtBox").innerHTML = err;
     }
@@ -603,12 +629,12 @@ function CheckForPlugIn_NPAPI() {
     {
         if(typeof(CurrentPluginVersion) != "string")
         {
-            document.getElementById('CSPVersionTxt').innerHTML = "Р’РµСЂСЃРёСЏ РєСЂРёРїС‚РѕРїСЂРѕРІР°Р№РґРµСЂР°: " + GetCSPVersion_NPAPI();
+            document.getElementById('CSPVersionTxt').innerHTML = "Версия криптопровайдера: " + GetCSPVersion_NPAPI();
         }
         var sCSPName = GetCSPName_NPAPI();
         if(sCSPName!="")
         {
-            document.getElementById('CSPNameTxt').innerHTML = "РљСЂРёРїС‚РѕРїСЂРѕРІР°Р№РґРµСЂ: " + sCSPName;
+            document.getElementById('CSPNameTxt').innerHTML = "Криптопровайдер: " + sCSPName;
         }
     }
     function GetLatestVersion_NPAPI(CurrentPluginVersion) {
@@ -619,26 +645,26 @@ function CheckForPlugIn_NPAPI() {
             if (xmlhttp.readyState == 4) {
                 if(xmlhttp.status == 200) {
                     PluginBaseVersion = xmlhttp.responseText;
-                    if (isPluginWorked) { // РїР»Р°РіРёРЅ СЂР°Р±РѕС‚Р°РµС‚, РѕР±СЉРµРєС‚С‹ СЃРѕР·РґР°СЋС‚СЃСЏ
+                    if (isPluginWorked) { // плагин работает, объекты создаются
                         if (VersionCompare_NPAPI(PluginBaseVersion, CurrentPluginVersion)<0) {
                             document.getElementById('PluginEnabledImg').setAttribute("src", "Img/yellow_dot.png");
-                            document.getElementById('PlugInEnabledTxt').innerHTML = "РџР»Р°РіРёРЅ Р·Р°РіСЂСѓР¶РµРЅ, РЅРѕ РµСЃС‚СЊ Р±РѕР»РµРµ СЃРІРµР¶Р°СЏ РІРµСЂСЃРёСЏ.";
+                            document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен, но есть более свежая версия.";
                         }
                     }
-                    else { // РїР»Р°РіРёРЅ РЅРµ СЂР°Р±РѕС‚Р°РµС‚, РѕР±СЉРµРєС‚С‹ РЅРµ СЃРѕР·РґР°СЋС‚СЃСЏ
-                        if (isPluginLoaded) { // РїР»Р°РіРёРЅ Р·Р°РіСЂСѓР¶РµРЅ
-                            if (!isPluginEnabled) { // РїР»Р°РіРёРЅ Р·Р°РіСЂСѓР¶РµРЅ, РЅРѕ РѕС‚РєР»СЋС‡РµРЅ
+                    else { // плагин не работает, объекты не создаются
+                        if (isPluginLoaded) { // плагин загружен
+                            if (!isPluginEnabled) { // плагин загружен, но отключен
                                 document.getElementById('PluginEnabledImg').setAttribute("src", "Img/red_dot.png");
-                                document.getElementById('PlugInEnabledTxt').innerHTML = "РџР»Р°РіРёРЅ Р·Р°РіСЂСѓР¶РµРЅ, РЅРѕ РѕС‚РєР»СЋС‡РµРЅ РІ РЅР°СЃС‚СЂРѕР№РєР°С… Р±СЂР°СѓР·РµСЂР°.";
+                                document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен, но отключен в настройках браузера.";
                             }
-                            else { // РїР»Р°РіРёРЅ Р·Р°РіСЂСѓР¶РµРЅ Рё РІРєР»СЋС‡РµРЅ, РЅРѕ РѕР±СЉРµРєС‚С‹ РЅРµ СЃРѕР·РґР°СЋС‚СЃСЏ
+                            else { // плагин загружен и включен, но объекты не создаются
                                 document.getElementById('PluginEnabledImg').setAttribute("src", "Img/red_dot.png");
-                                document.getElementById('PlugInEnabledTxt').innerHTML = "РџР»Р°РіРёРЅ Р·Р°РіСЂСѓР¶РµРЅ, РЅРѕ РЅРµ СѓРґР°РµС‚СЃСЏ СЃРѕР·РґР°С‚СЊ РѕР±СЉРµРєС‚С‹. РџСЂРѕРІРµСЂСЊС‚Рµ РЅР°СЃС‚СЂРѕР№РєРё Р±СЂР°СѓР·РµСЂР°.";
+                                document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен, но не удается создать объекты. Проверьте настройки браузера.";
                             }
                         }
-                        else { // РїР»Р°РіРёРЅ РЅРµ Р·Р°РіСЂСѓР¶РµРЅ
+                        else { // плагин не загружен
                             document.getElementById('PluginEnabledImg').setAttribute("src", "Img/red_dot.png");
-                            document.getElementById('PlugInEnabledTxt').innerHTML = "РџР»Р°РіРёРЅ РЅРµ Р·Р°РіСЂСѓР¶РµРЅ.";
+                            document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин не загружен.";
                         }
                     }
                 }
@@ -656,19 +682,19 @@ function CheckForPlugIn_NPAPI() {
         isPluginEnabled = true;
         isPluginWorked = true;
 
-        // Р­С‚Рѕ Р·РЅР°С‡РµРЅРёРµ Р±СѓРґРµС‚ РїСЂРѕРІРµСЂСЏС‚СЊСЃСЏ СЃРµСЂРІРµСЂРѕРј РїСЂРё Р·Р°РіСЂСѓР·РєРµ РґРµРјРѕ-СЃС‚СЂР°РЅРёС†С‹
+        // Это значение будет проверяться сервером при загрузке демо-страницы
         var CurrentPluginVersion = oAbout.PluginVersion;
         if( typeof(CurrentPluginVersion) == "undefined")
             CurrentPluginVersion = oAbout.Version;
 
         document.getElementById('PluginEnabledImg').setAttribute("src", "Img/green_dot.png");
-        document.getElementById('PlugInEnabledTxt').innerHTML = "РџР»Р°РіРёРЅ Р·Р°РіСЂСѓР¶РµРЅ.";
-        document.getElementById('PlugInVersionTxt').innerHTML = "Р’РµСЂСЃРёСЏ РїР»Р°РіРёРЅР°: " + MakeVersionString(CurrentPluginVersion);
+        document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен.";
+        document.getElementById('PlugInVersionTxt').innerHTML = "Версия плагина: " + MakeVersionString(CurrentPluginVersion);
         ShowCSPVersion_NPAPI(CurrentPluginVersion);
     }
     catch (err) {
-        // РћР±СЉРµРєС‚ СЃРѕР·РґР°С‚СЊ РЅРµ СѓРґР°Р»РѕСЃСЊ, РїСЂРѕРІРµСЂРёРј, СѓСЃС‚Р°РЅРѕРІР»РµРЅ Р»Рё
-        // РІРѕРѕР±С‰Рµ РїР»Р°РіРёРЅ. РўР°РєР°СЏ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РµСЃС‚СЊ РЅРµ РІРѕ РІСЃРµС… Р±СЂР°СѓР·РµСЂР°С…
+        // Объект создать не удалось, проверим, установлен ли
+        // вообще плагин. Такая возможность есть не во всех браузерах
         var mimetype = navigator.mimeTypes["application/x-cades"];
         if (mimetype) {
             isPluginLoaded = true;
@@ -735,7 +761,7 @@ CertificateObj.prototype.DateTimePutTogether = function(certDate)
 
 CertificateObj.prototype.GetCertString = function()
 {
-    return this.extract(this.cert.SubjectName,'CN=') + "; Р’С‹РґР°РЅ: " + this.GetCertFromDate();
+    return this.extract(this.cert.SubjectName,'CN=') + "; Выдан: " + this.GetCertFromDate();
 }
 
 CertificateObj.prototype.GetCertFromDate = function()
@@ -806,7 +832,7 @@ function GetFirstCert_NPAPI() {
             }
         }
         catch (ex) {
-            alert("РћС€РёР±РєР° РїСЂРё РїРµСЂРµС‡РёСЃР»РµРЅРёРё СЃРµСЂС‚РёС„РёРєР°С‚РѕРІ: " + cadesplugin.getLastError(ex));
+            alert("Ошибка при перечислении сертификатов: " + cadesplugin.getLastError(ex));
             return;
         }
     }
@@ -824,7 +850,7 @@ function CreateSimpleSign_NPAPI()
             document.getElementById("SignatureTxtBox").innerHTML = sSignedData;
             if(x!=null)
             {
-                x.innerHTML = "РџРѕРґРїРёСЃСЊ СЃС„РѕСЂРјРёСЂРѕРІР°РЅР° СѓСЃРїРµС€РЅРѕ:";
+                x.innerHTML = "Подпись сформирована успешно 5s";
             }
         }
     }
@@ -832,7 +858,7 @@ function CreateSimpleSign_NPAPI()
     {
         if(x!=null)
         {
-            x.innerHTML = "Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР°:";
+            x.innerHTML = "Возникла ошибка:";
         }
         document.getElementById("SignatureTxtBox").innerHTML = err;
     }
@@ -877,7 +903,7 @@ function FillCertList_NPAPI(lstId) {
                 cert = oStore.Certificates.Item(i);
             }
             catch (ex) {
-                alert("РћС€РёР±РєР° РїСЂРё РїРµСЂРµС‡РёСЃР»РµРЅРёРё СЃРµСЂС‚РёС„РёРєР°С‚РѕРІ: " + cadesplugin.getLastError(ex));
+                alert("Ошибка при перечислении сертификатов: " + cadesplugin.getLastError(ex));
                 return;
             }
 
@@ -887,7 +913,7 @@ function FillCertList_NPAPI(lstId) {
                 oOpt.text = certObj.GetCertString();
             }
             catch (ex) {
-                alert("РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё СЃРІРѕР№СЃС‚РІР° SubjectName: " + cadesplugin.getLastError(ex));
+                alert("Ошибка при получении свойства SubjectName: " + cadesplugin.getLastError(ex));
             }
             try {
                 oOpt.value = global_selectbox_counter
@@ -896,7 +922,7 @@ function FillCertList_NPAPI(lstId) {
                 global_selectbox_counter++;
             }
             catch (ex) {
-                alert("РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё СЃРІРѕР№СЃС‚РІР° Thumbprint: " + cadesplugin.getLastError(ex));
+                alert("Ошибка при получении свойства Thumbprint: " + cadesplugin.getLastError(ex));
             }
 
             lst.options.add(oOpt);
@@ -905,14 +931,14 @@ function FillCertList_NPAPI(lstId) {
         oStore.Close();
     }
 
-    //Р’ РІРµСЂСЃРёРё РїР»Р°РіРёРЅР° 2.0.13292+ РµСЃС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РїРѕР»СѓС‡РёС‚СЊ СЃРµСЂС‚РёС„РёРєР°С‚С‹ РёР·
-    //Р·Р°РєСЂС‹С‚С‹С… РєР»СЋС‡РµР№ Рё РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹С… РІ С…СЂР°РЅРёР»РёС‰Рµ
+    //В версии плагина 2.0.13292+ есть возможность получить сертификаты из
+    //закрытых ключей и не установленных в хранилище
     try {
         oStore.Open(cadesplugin.CADESCOM_CONTAINER_STORE);
         certCnt = oStore.Certificates.Count;
         for (var i = 1; i <= certCnt; i++) {
             var cert = oStore.Certificates.Item(i);
-            //РџСЂРѕРІРµСЂСЏРµРј РЅРµ РґРѕР±Р°РІР»СЏР»Рё Р»Рё РјС‹ С‚Р°РєРѕР№ СЃРµСЂС‚РёС„РёРєР°С‚ СѓР¶Рµ?
+            //Проверяем не добавляли ли мы такой сертификат уже?
             var found = false;
             for (var j = 0; j < global_selectbox_container.length; j++)
             {
@@ -1146,11 +1172,11 @@ function Encrypt_NPAPI() {
         var ExportedKey2 = oSymAlgo.ExportKey(certificate2);
         document.getElementById("DataEncryptedKey2").value = ExportedKey2;
 
-        alert("Р”Р°РЅРЅС‹Рµ Р·Р°С€РёС„СЂРѕРІР°РЅС‹ СѓСЃРїРµС€РЅРѕ:");
+        alert("Данные зашифрованы успешно:");
     }
     catch(err)
     {
-        alert("РћС€РёР±РєР° РїСЂРё С€РёС„СЂРѕРІР°РЅРёРё РґР°РЅРЅС‹С…:" + err);
+        alert("Ошибка при шифровании данных:" + err);
     }
 }
 
@@ -1201,11 +1227,11 @@ function Decrypt_NPAPI(certListBoxId) {
         var EncryptedData2 = oSesKey2.Decrypt(dataToDecr2, 1);
         document.getElementById("DataDecryptedBox2").value = Base64.decode(EncryptedData2);
 
-        alert("Р”Р°РЅРЅС‹Рµ СЂР°СЃС€РёС„СЂРѕРІР°РЅС‹ СѓСЃРїРµС€РЅРѕ:");
+        alert("Данные расшифрованы успешно:");
     }
     catch(err)
     {
-        alert("РћС€РёР±РєР° РїСЂРё С€РёС„СЂРѕРІР°РЅРёРё РґР°РЅРЅС‹С…:" + err);
+        alert("Ошибка при шифровании данных:" + err);
     }
 }
 
@@ -1222,7 +1248,7 @@ function isEdge() {
 
 function ShowEdgeNotSupported() {
     document.getElementById('PluginEnabledImg').setAttribute("src", "Img/red_dot.png");
-    document.getElementById('PlugInEnabledTxt').innerHTML = "Рљ СЃРѕР¶Р°Р»РµРЅРёСЋ, Р±СЂР°СѓР·РµСЂ Edge РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ!";
+    document.getElementById('PlugInEnabledTxt').innerHTML = "К сожалению, браузер Edge не поддерживается!";
 }
 
 //-----------------------------------
@@ -1357,29 +1383,13 @@ var Base64 = {
     }
 
 }
-var MakePayment = function(sum,date,to){
-    return '<!PINPADFILE UTF8><N>РџР»Р°С‚РµР¶РЅРѕРµ РїРѕСЂСѓС‡РµРЅРёРµ<V>500'
-        + '<N>РЎСѓРјРјР°<V>' + sum
-        + '<N>Р”Р°С‚Р°<V>' + date
-        + '<N>РџРѕР»СѓС‡Р°С‚РµР»СЊ<V>' + to
-        + '<N>РРЅРЅ<V>102125125212'
-        + '<N>РљРџРџ<V>1254521521'
-        + '<N>РќР°Р·РЅР°С‡РµРЅРёРµ РїР»Р°С‚РµР¶Р°<V>Р—Р° С‚РµР»РµРјР°С‚РёС‡РµСЃРєРёРµ СѓСЃР»СѓРіРё'
-        + '<N>Р‘Р°РЅРє РїРѕР»СѓС‡Р°С‚РµР»СЏ<V>РЎР±РµСЂР±Р°РЅРє'
-        + '<N>Р‘РРљ<V>5005825'
-        + '<N>РќРѕРјРµСЂ СЃС‡РµС‚Р° РїРѕР»СѓС‡Р°С‚РµР»СЏ<V>1032221122214422'
-        + '<N>РџР»Р°С‚РµР»СЊС‰РёРє<V>Р—РђРћ "РђРєС‚РёРІ-СЃРѕС„С‚"'
-        + '<N>Р‘Р°РЅРє РїР»Р°С‚РµР»СЊС‰РёРєР°<V>Р‘Р°РЅРє Р’РўР‘ (РѕС‚РєСЂС‹С‚РѕРµ Р°РєС†РёРѕРЅРµСЂРЅРѕРµ РѕР±С‰РµСЃС‚РІРѕ)'
-        + '<N>Р‘РРљ<V>044525187'
-        + '<N>РќРѕРјРµСЂ СЃС‡РµС‚Р° РїР»Р°С‚РµР»СЊС‰РёРєР°<V>30101810700000000187';
-};
 
 
 
 function ShowPinPadelogin(){
     var loginvalue = document.getElementById('Login').value;
-    var text = '<!PINPADFILE UTF8><N>РђРІС‚РѕСЂРёР·Р°С†РёСЏ<V><N>РџРѕРґС‚РІРµСЂРґРёС‚Рµ Р°РІС‚РѕСЂРёР·Р°С†РёСЋ РЅР° СЃР°Р№С‚Рµ<V>'
+    var text = '<!PINPADFILE UTF8><N>Авторизация<V><N>Подтвердите авторизацию на сайте<V>'
         + 'cryptopro.ru'
-        + '<N>Р’С…РѕРґ Р±СѓРґРµС‚ РїСЂРѕРёР·РІРµРґРµРЅ СЃ Р»РѕРіРёРЅРѕРј<V>' + loginvalue;
+        + '<N>Вход будет произведен с логином<V>' + loginvalue;
     Common_SignCadesBES('CertListBox',text, 1);
 }

@@ -7,7 +7,7 @@ CertificateAdjuster.prototype.checkQuotes = function(str)
     for(i;i<str.length;i++)if(str[i]==='"')
         result++;
     return !(result%2);
-}
+};
 
 CertificateAdjuster.prototype.extract = function(from, what)
 {
@@ -27,34 +27,34 @@ CertificateAdjuster.prototype.extract = function(from, what)
     }
 
     return certName;
-}
+};
 
 CertificateAdjuster.prototype.Print2Digit = function(digit)
 {
     return (digit<10) ? "0"+digit : digit;
-}
+};
 
 CertificateAdjuster.prototype.GetCertDate = function(paramDate)
 {
     var certDate = new Date(paramDate);
     return this.Print2Digit(certDate.getUTCDate())+"."+this.Print2Digit(certDate.getUTCMonth()+1)+"."+certDate.getFullYear() + " " +
         this.Print2Digit(certDate.getUTCHours()) + ":" + this.Print2Digit(certDate.getUTCMinutes()) + ":" + this.Print2Digit(certDate.getUTCSeconds());
-}
+};
 
 CertificateAdjuster.prototype.GetCertName = function(certSubjectName)
 {
     return this.extract(certSubjectName, 'CN=');
-}
+};
 
 CertificateAdjuster.prototype.GetIssuer = function(certIssuerName)
 {
     return this.extract(certIssuerName, 'CN=');
-}
+};
 
 CertificateAdjuster.prototype.GetCertInfoString = function(certSubjectName, certFromDate)
 {
     return this.extract(certSubjectName,'CN=') + "; Выдан: " + this.GetCertDate(certFromDate);
-}
+};
 
 function CheckForPlugIn_Async() {
     function VersionCompare_Async(StringVersion, ObjectVersion)
@@ -88,14 +88,14 @@ function CheckForPlugIn_Async() {
 
             if(!isActualVersion)
             {
-                document.getElementById('PluginEnabledImg').setAttribute("src", "Img/yellow_dot.png");
-                document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен, но есть более свежая версия.";
+                // document.getElementById('PluginEnabledImg').setAttribute("src", "Img/yellow_dot.png");
+                // document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен, но есть более свежая версия.";
             }
-            document.getElementById('PlugInVersionTxt').innerHTML = "Версия плагина: " + (yield CurrentPluginVersion.toString());
+            // document.getElementById('PlugInVersionTxt').innerHTML = "Версия плагина: " + (yield CurrentPluginVersion.toString());
             var oAbout = yield cadesplugin.CreateObjectAsync("CAdESCOM.About");
             var ver = yield oAbout.CSPVersion("", 80);
             var ret = (yield ver.MajorVersion) + "." + (yield ver.MinorVersion) + "." + (yield ver.BuildVersion);
-            document.getElementById('CSPVersionTxt').innerHTML = "Версия криптопровайдера: " + ret;
+            // document.getElementById('CSPVersionTxt').innerHTML = "Версия криптопровайдера: " + ret;
 
             try
             {
@@ -103,13 +103,13 @@ function CheckForPlugIn_Async() {
                 document.getElementById('CSPNameTxt').innerHTML = "Криптопровайдер: " + sCSPName;
             }
             catch(err){}
-            return;
+
         });
     }
 
     function GetLatestVersion_Async(CurrentPluginVersion) {
         var xmlhttp = getXmlHttp();
-        xmlhttp.open("GET", "/sites/default/files/products/cades/latest_2_0.txt", true);
+        xmlhttp.open("GET", "https://www.cryptopro.ru/sites/default/files/products/cades/latest_2_0.txt", true);
         xmlhttp.onreadystatechange = function() {
             var PluginBaseVersion;
             if (xmlhttp.readyState == 4) {
@@ -118,12 +118,12 @@ function CheckForPlugIn_Async() {
                     VersionCompare_Async(PluginBaseVersion, CurrentPluginVersion)
                 }
             }
-        }
+        };
         xmlhttp.send(null);
     }
 
-    document.getElementById('PluginEnabledImg').setAttribute("src", "Img/green_dot.png");
-    document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен.";
+    // document.getElementById('PluginEnabledImg').setAttribute("src", "Img/green_dot.png");
+    // document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен.";
     var CurrentPluginVersion;
     cadesplugin.async_spawn(function *() {
         var oAbout = yield cadesplugin.CreateObjectAsync("CAdESCOM.About");
@@ -133,7 +133,7 @@ function CheckForPlugIn_Async() {
             FillCertList_Async('CertListBox1');
             FillCertList_Async('CertListBox2');
         }else {
-            FillCertList_Async('CertListBox');
+            FillCertList_Async('CertListBox', 'CertListBox2');
         }
         // var txtDataToSign = "Hello World";
         // document.getElementById("DataToSignTxtBox").innerHTML = txtDataToSign;
@@ -149,7 +149,7 @@ function onCertificateSelected(event) {
     }, event.target);//cadesplugin.async_spawn
 }
 
-function FillCertList_Async(lstId) {
+function FillCertList_Async(lstId, secondId) {
     cadesplugin.async_spawn(function *() {
         var MyStoreExists = true;
         try {
@@ -173,6 +173,14 @@ function FillCertList_Async(lstId) {
         lst.onchange = onCertificateSelected;
         lst.boxId = lstId;
 
+        var second = document.getElementById(secondId);
+        if(!second)
+        {
+            return;
+        }
+        second.onchange = onCertificateSelected;
+        second.boxId = secondId;
+
         var certCnt;
         var certs;
         if (MyStoreExists) {
@@ -195,17 +203,22 @@ function FillCertList_Async(lstId) {
                 }
 
                 var oOpt = document.createElement("OPTION");
+                var oOpt2 = document.createElement("OPTION");
                 var dateObj = new Date();
                 try {
                     var ValidFromDate = new Date((yield cert.ValidFromDate));
                     oOpt.text = new CertificateAdjuster().GetCertInfoString(yield cert.SubjectName, ValidFromDate);
+                    oOpt2.text = new CertificateAdjuster().GetCertInfoString(yield cert.SubjectName, ValidFromDate);
+                    console.log('and certificate is:');
+                    console.log(cert);
                 }
                 catch (ex) {
                     alert("Ошибка при получении свойства SubjectName: " + cadesplugin.getLastError(ex));
                 }
                 try {
                     //oOpt.value = yield cert.Thumbprint;
-                    oOpt.value = global_selectbox_counter
+                    oOpt.value = global_selectbox_counter;
+                    oOpt2.value = global_selectbox_counter;
                     global_selectbox_container.push(cert);
                     global_isFromCont.push(false);
                     global_selectbox_counter++;
@@ -215,6 +228,7 @@ function FillCertList_Async(lstId) {
                 }
 
                 lst.options.add(oOpt);
+                second.options.add(oOpt2);
             }
 
             yield oStore.Close();
@@ -297,7 +311,7 @@ function CreateSimpleSign_Async() {
                     break;
                 }
                 else {
-                    continue;
+
                 }
             }
             catch (ex) {
@@ -347,7 +361,7 @@ function CreateSimpleSign_Async() {
                 }
             }
             document.getElementById("SignatureTxtBox").innerHTML = Signature;
-            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно:";
+            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно1a";
         }
         catch(err)
         {
@@ -431,7 +445,7 @@ function SignCadesBES_Async(certListBoxId, data, setDisplayData) {
                 }
             }
             document.getElementById("SignatureTxtBox").innerHTML = Signature;
-            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно:";
+            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно 2a";
         }
         catch(err)
         {
@@ -488,32 +502,46 @@ function SignCadesBES_Async_File(certListBoxId) {
 
             var oSignedData = yield cadesplugin.CreateObjectAsync("CAdESCOM.CadesSignedData");
             var CADES_BES = 1;
+            var dataToSign = fileContent[0]; // fileContent - объявлен в Code.js
 
-            var dataToSign = fileContent; // fileContent - объявлен в Code.js
-            if (dataToSign) {
-                // Данные на подпись ввели
-                yield oSignedData.propset_ContentEncoding(1); //CADESCOM_BASE64_TO_BINARY
-                yield oSignedData.propset_Content(dataToSign);
-                yield oSigner.propset_Options(1); //CAPICOM_CERTIFICATE_INCLUDE_WHOLE_CHAIN
-                try {
-                    var StartTime = Date.now();
-                    Signature = yield oSignedData.SignCades(oSigner, CADES_BES);
-                    var EndTime = Date.now();
-                    document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + (EndTime - StartTime) + " мс";
+            for (var i = 0; i < fileContent.length; i++) {
+                if (dataToSign) {
+                    // Данные на подпись ввели
+                    yield oSignedData.propset_ContentEncoding(1); //CADESCOM_BASE64_TO_BINARY
+                    yield oSignedData.propset_Content(dataToSign);
+                    yield oSigner.propset_Options(1); //CAPICOM_CERTIFICATE_INCLUDE_WHOLE_CHAIN
+                    try {
+                        var StartTime = Date.now();
+                        Signature = yield oSignedData.SignCades(oSigner, CADES_BES);
+                        var EndTime = Date.now();
+                        timeSum += EndTime - StartTime;
+                        document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + timeSum + " мс";
+                        document.getElementsByName('filesLeft')[0].innerHTML = (i + 1) + ' лол';
+                    }
+                    catch (err) {
+                        errormes = "Не удалось создать подпись из-за ошибки: " + cadesplugin.getLastError(err);
+                        throw errormes;
+                    }
                 }
-                catch (err) {
-                    errormes = "Не удалось создать подпись из-за ошибки: " + cadesplugin.getLastError(err);
-                    throw errormes;
+                sigArray[i] = Signature;
+                if (certListBoxId === "CertListBox") {
+                    document.getElementById("SignatureTxtBox").innerHTML = Signature;
                 }
+                if (certListBoxId === "CertListBox2") {
+                    document.getElementById("SignatureTxtBox2").innerHTML = Signature;
+                }
+                SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно 3a";
             }
-            document.getElementById("SignatureTxtBox").innerHTML = Signature;
-            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно:";
+            for(var i = 0; i < FILES_TOTAL_COUNT; i++) {
+                sendSigArray(sigArray[i], i + 1);
+            }
         }
         catch(err)
         {
             SignatureFieldTitle[0].innerHTML = "Возникла ошибка:";
             document.getElementById("SignatureTxtBox").innerHTML = err;
         }
+
     }, certListBoxId); //cadesplugin.async_spawn
 }
 
@@ -565,7 +593,7 @@ function SignCadesEnhanced_Async(certListBoxId, sign_type) {
                 }
             }
             document.getElementById("SignatureTxtBox").innerHTML = Signature;
-            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно:";
+            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно 4a";
         }
         catch(err)
         {
@@ -653,7 +681,7 @@ function SignCadesXML_Async(certListBoxId, signatureType) {
                 }
             }
             document.getElementById("SignatureTxtBox").innerHTML = Signature;
-            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно:";
+            SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно 5a";
         }
         catch(err)
         {
@@ -669,6 +697,7 @@ function FillCertInfo_Async(certificate, certBoxId, isFromContainer)
     var field_prefix;
     if(typeof(certBoxId) == 'undefined' || certBoxId == "CertListBox")
     {
+        alert('KekAsync');
         BoxId = 'cert_info';
         field_prefix = '';
     }else if (certBoxId == "CertListBox1") {
@@ -897,7 +926,6 @@ function Decrypt_Async(certListBoxId) {
 function RetrieveCertificate_Async()
 {
     cadesplugin.async_spawn (function*(arg) {
-        console.log('1-st in async');
         try {
             var PrivateKey = yield cadesplugin.CreateObjectAsync("X509Enrollment.CX509PrivateKey");
         }
@@ -910,7 +938,6 @@ function RetrieveCertificate_Async()
         yield PrivateKey.propset_ProviderType(80);
         yield PrivateKey.propset_KeySpec(1); //XCN_AT_KEYEXCHANGE
 
-        console.log('2-st in async');
         try {
             var CertificateRequestPkcs10 = yield cadesplugin.CreateObjectAsync("X509Enrollment.CX509CertificateRequestPkcs10");
         }
@@ -921,7 +948,6 @@ function RetrieveCertificate_Async()
 
         yield CertificateRequestPkcs10.InitializeFromPrivateKey(0x1, PrivateKey, "");
 
-        console.log('3-st in async');
         try {
             var DistinguishedName = yield cadesplugin.CreateObjectAsync("X509Enrollment.CX500DistinguishedName");
         }
@@ -949,7 +975,6 @@ function RetrieveCertificate_Async()
 
         yield (yield CertificateRequestPkcs10.X509Extensions).Add(KeyUsageExtension);
 
-        console.log('4-st in async');
         try {
             var Enroll = yield cadesplugin.CreateObjectAsync("X509Enrollment.CX509Enrollment");
         }
@@ -959,7 +984,6 @@ function RetrieveCertificate_Async()
         }
 
         var cert_req;
-        console.log('5-st in async');
         try {
             yield Enroll.InitializeFromRequest(CertificateRequestPkcs10);
             cert_req = yield Enroll.CreateRequest(0x1);
@@ -968,8 +992,6 @@ function RetrieveCertificate_Async()
             return;
         }
 
-        console.log('5.5-st in async');
-        alert('5.5-st in async');
         var params = 'CertRequest=' + encodeURIComponent(cert_req) +
             '&Mode=' + encodeURIComponent('newreq') +
             '&TargetStoreFlags=' + encodeURIComponent('0') +
@@ -994,8 +1016,6 @@ function RetrieveCertificate_Async()
                         }
                         else
                         {
-                            console.log('5.5-st in async');
-                            alert('5.5-st in async');
                             var start = response.indexOf("sPKCS7 & \"") + 9;
                             var end = response.indexOf("& vbNewLine\r\n\r\n</Script>");
                             cert_data = response.substring(start, end);
@@ -1006,8 +1026,6 @@ function RetrieveCertificate_Async()
 
                         eval(cert_data);
 
-                        console.log('6-st in async');
-                        alert('6-st in async');
                         try {
                             var Enroll = yield cadesplugin.CreateObjectAsync("X509Enrollment.CX509Enrollment");
                         }
@@ -1027,12 +1045,12 @@ function RetrieveCertificate_Async()
                             FillCertList_Async('CertListBox2');
                         }
                         else{
-                            FillCertList_Async('CertListBox');
+                            FillCertList_Async('CertListBox', 'CertListBox2');
                         }
                     }, xmlhttp.responseText);//cadesplugin.async_spawn
                 }
             }
-        }
+        };
         xmlhttp.send(params);
     });//cadesplugin.async_spawn
 }
@@ -1102,8 +1120,8 @@ function CheckForPlugInUEC_Async()
                 document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин загружен. Не установлен УЭК CSP.";
             }
         }
-        document.getElementById('PlugInVersionTxt').innerHTML = "Версия плагина: " + (yield CurrentPluginVersion.toString());
-        document.getElementById('CSPVersionTxt').innerHTML = "Версия УЭК CSP: " + (yield UECCSPVersion.toString());
+        // document.getElementById('PlugInVersionTxt').innerHTML = "Версия плагина: " + (yield CurrentPluginVersion.toString());
+        // document.getElementById('CSPVersionTxt').innerHTML = "Версия УЭК CSP: " + (yield UECCSPVersion.toString());
     }); //cadesplugin.async_spawn
 }
 
@@ -1161,7 +1179,7 @@ function FoundCertInStore_Async(cerToFind) {
                         }
                     }
                     else {
-                        continue;
+
                     }
                 }
                 catch (ex) {
@@ -1258,7 +1276,7 @@ function verifyCert_Async() {
         function(signedMessage){
             document.getElementById("SignatureTxtBox").innerHTML = signedMessage;
             var x = document.getElementsByName("SignatureTitle");
-            x[0].innerHTML = "Подпись сформирована успешно:";
+            x[0].innerHTML = "Подпись сформирована успешно 6a";
             removeWaitMessage();
         },
         function(signedMessage){
