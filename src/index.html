@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание ЭП</title>
+    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
+</head>
+<body>
+    <section class="title-section">
+        <div class="title-container">
+            <p>Создание ЭП</p>
+        </div>
+    </section>
+
+    <section class="main-section">
+        <div class="documents-container">
+            <div class="documents">
+                <div class="documents-subtitle">
+                    <div class="subtitle">
+                        <p class="subtitle-text">Документы на подпись</p>
+                    </div>
+                    <div>
+                        <input id="openFileButton" type='file' multiple onchange="openFile(event)" style="width:100%">
+                        <script>
+                            timeSum = 0;
+                            var openFile = function(event) {
+                                fileContent = [];
+                                var input = event.target;
+                                var filesDataArray = [];
+                                var header = ";base64,";
+                                FILES_TOTAL_COUNT = input.files.length;
+
+                                for (var i = 0; i < FILES_TOTAL_COUNT; i++) {
+                                    let reader = new FileReader();
+                                    (function(file){
+                                        reader.readAsDataURL(file);
+                                        reader.onload = function () {
+                                            for (var j = 0; j < FILES_TOTAL_COUNT; j++) {
+                                                // console.log('reader.result');
+                                                // console.log(reader.result);
+                                                filesDataArray[j] = reader.result;
+                                                // console.log('error about sustr:');
+                                                // console.log(filesDataArray[j]);
+                                                // console.log(typeof filesDataArray[j]);
+                                                fileContent[j] = filesDataArray[j].substr(filesDataArray[j].indexOf(header) + header.length);
+                                            }
+                                        }
+                                    })(input.files[i]);
+                                }
+                            };
+                        </script>
+                    </div>
+                    <div class="documents-subtitle-total">
+                        <p>Всего документов:</p>
+                        <p class="total-amount"></p>
+                    </div>
+                </div>
+                <div class="documents-list">
+                    <p id="info_msg" name="SignatureTitle">Подпись</p>
+                    <p id="info_msg2" name ="TimeTitle">Время выполнения: </p>
+                    <p id="info_msg3" name="filesLeft">Файлов подписано</p>
+                    <p>Подпись №1:</p>
+                    <textarea id="SignatureTxtBox" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
+                        </textarea>
+                    <br>
+                    <p>Подпись №2:</p>
+                    <textarea id="SignatureTxtBox2" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
+                        </textarea>
+                </div>
+                <div class="steps-container">
+
+                </div>
+            </div>
+        </div>
+        <div class="user-data-container">
+            <div class="doctor-name-container">
+                <form class="doctor-name">
+                    <div>
+                        <label for="CertListBox" class="label">Подписать от имени</label>
+                        <br>
+                        <select id="CertListBox" name="CertListBox" class="input_field">
+                        </select>
+                        <div id="boxdiv" style="display: none;">
+                                        <span id="errorarea">
+                                            У вас отсутствуют личные сертификаты. Вы можете
+                                            <a href="#" onclick="Common_RetrieveCertificate();" style="color:#0837ff"> получить</a>
+                                            сертификат от тестового УЦ, предварительно установив
+                                            <a href="https://testca.cryptopro.ru/certsrv/certnew.cer?ReqID=CACert&amp;Renewal=1&amp;Enc=bin" style="color:#0837ff">корневой сертификат тестового УЦ</a>
+                                            в доверенные.
+                                        </span>
+                        </div>
+                        <input id="SignBtn" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="
+                                                    if ('' == openFileButton.value)
+                                                        { alert('Файл не выбран.'); return; }
+                                                    else
+                                                        if ('' == fileContent[0])
+                                                        {
+                                                            console.log(fileContent);
+                                                            alert('Выбран пустой файл');
+                                                            return;
+                                                        }
+                                                    else
+                                                        Common_SignCadesBES_File('CertListBox')" />
+
+                    </div>
+                </form>
+
+                <form class="organization-name">
+                    <div>
+                        <label for="CertListBox2" class="label">Подписать от Организации</label>
+                        <br>
+                        <select id="CertListBox2" name="CertListBox2" class="input_field">
+                        </select>
+
+                        <input id="SignBtn2" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="
+                                                    if ('' == openFileButton.value)
+                                                        { alert('Файл не выбран.'); return; }
+                                                    else
+                                                        if ('' == fileContent[0])
+                                                        {
+                                                            console.log(fileContent);
+                                                            alert('Выбран пустой файл');
+                                                            return;
+                                                        }
+                                                    else
+                                                        Common_SignCadesBES_File('CertListBox2')"  />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <script src="cadesplugin_api.js"></script>
+    <script src="./js/code.js"></script>
+    <script src="js/onload.js"></script>
+</body>
+</html>
