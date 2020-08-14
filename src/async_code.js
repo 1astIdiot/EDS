@@ -516,7 +516,7 @@ function SignCadesBES_Async_File(certListBoxId) {
                         var EndTime = Date.now();
                         timeSum += EndTime - StartTime;
                         document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + timeSum + " мс";
-                        document.getElementsByName('filesLeft')[0].innerHTML = (i + 1) + ' лол';
+                        document.getElementsByName('filesLeft')[0].innerHTML = 'Файлов подписано:' + (i + 1);
                     }
                     catch (err) {
                         errormes = "Не удалось создать подпись из-за ошибки: " + cadesplugin.getLastError(err);

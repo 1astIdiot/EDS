@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Создание ЭП</title>
     <link rel="stylesheet" type="text/css" href="src/styles/main.css"/>
+    <link rel="stylesheet" href="./font-awesome-4.7.0/css/font-awesome.min.css">
 </head>
 <body>
     <section class="title-section">
@@ -36,12 +37,7 @@
                                         reader.readAsDataURL(file);
                                         reader.onload = function () {
                                             for (var j = 0; j < FILES_TOTAL_COUNT; j++) {
-                                                // console.log('reader.result');
-                                                // console.log(reader.result);
                                                 filesDataArray[j] = reader.result;
-                                                // console.log('error about sustr:');
-                                                // console.log(filesDataArray[j]);
-                                                // console.log(typeof filesDataArray[j]);
                                                 fileContent[j] = filesDataArray[j].substr(filesDataArray[j].indexOf(header) + header.length);
                                             }
                                         }
@@ -50,15 +46,15 @@
                             };
                         </script>
                     </div>
-                    <div class="documents-subtitle-total">
-                        <p>Всего документов:</p>
-                        <p class="total-amount"></p>
-                    </div>
+<!--                    <div class="documents-subtitle-total">-->
+<!--                        <p>Всего документов:</p>-->
+<!--                        <p class="total-amount" id="total-amount"></p>-->
+<!--                    </div>-->
                 </div>
                 <div class="documents-list">
                     <p id="info_msg" name="SignatureTitle">Подпись</p>
                     <p id="info_msg2" name ="TimeTitle">Время выполнения: </p>
-                    <p id="info_msg3" name="filesLeft">Файлов подписано</p>
+                    <p id="info_msg3" name="filesLeft">Файлов подписано:</p>
                     <p>Подпись №1:</p>
                     <textarea id="SignatureTxtBox" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
                         </textarea>
@@ -68,7 +64,7 @@
                         </textarea>
                 </div>
                 <div class="steps-container">
-
+                    <p class="step-one"><i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i> Список документов</p>
                 </div>
             </div>
         </div>
@@ -91,7 +87,7 @@
                         </div>
                         <input id="SignBtn" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="
                                                     if ('' == openFileButton.value)
-                                                        { alert('Файл не выбран.'); return; }
+                                                        { alert('Файлы не выбраны.'); return; }
                                                     else
                                                         if ('' == fileContent[0])
                                                         {
@@ -114,7 +110,7 @@
 
                         <input id="SignBtn2" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="
                                                     if ('' == openFileButton.value)
-                                                        { alert('Файл не выбран.'); return; }
+                                                        { alert('Файлы не выбраны.'); return; }
                                                     else
                                                         if ('' == fileContent[0])
                                                         {

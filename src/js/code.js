@@ -13,9 +13,10 @@ function sendSigArray(sig, name) {
     });
 
     let xhr = new XMLHttpRequest();
-    // xhr.setRequestHeader('Access-Control-Allow-Origin', 'http://localhost:63342');
     xhr.open('POST', 'http://localhost:8098/api/bregis/sign/saveSign', true);
+
     try {
+        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
         xhr.send(json);
         xhr.onload = function() {
             console.log("файл " + name + " загружен");
