@@ -13,7 +13,7 @@
         </div>
     </section>
 
-    <section class="main-section">
+    <section class="main-section" id="main-section">
         <div class="documents-container">
             <div class="documents">
                 <div class="documents-subtitle">
@@ -22,55 +22,35 @@
                     </div>
                     <div>
                         <input id="openFileButton" type='file' multiple onchange="openFile(event)" style="width:100%">
-                        <script>
-                            timeSum = 0;
-                            var openFile = function(event) {
-                                fileContent = [];
-                                var input = event.target;
-                                var filesDataArray = [];
-                                var header = ";base64,";
-                                FILES_TOTAL_COUNT = input.files.length;
-
-                                for (var i = 0; i < FILES_TOTAL_COUNT; i++) {
-                                    let reader = new FileReader();
-                                    (function(file){
-                                        reader.readAsDataURL(file);
-                                        reader.onload = function () {
-                                            for (var j = 0; j < FILES_TOTAL_COUNT; j++) {
-                                                filesDataArray[j] = reader.result;
-                                                fileContent[j] = filesDataArray[j].substr(filesDataArray[j].indexOf(header) + header.length);
-                                            }
-                                        }
-                                    })(input.files[i]);
-                                }
-                            };
-                        </script>
                     </div>
-<!--                    <div class="documents-subtitle-total">-->
-<!--                        <p>Всего документов:</p>-->
-<!--                        <p class="total-amount" id="total-amount"></p>-->
-<!--                    </div>-->
                 </div>
                 <div class="documents-list">
-                    <p id="info_msg" name="SignatureTitle">Подпись</p>
-                    <p id="info_msg2" name ="TimeTitle">Время выполнения: </p>
-                    <p id="info_msg3" name="filesLeft">Файлов подписано:</p>
-                    <p>Подпись №1:</p>
-                    <textarea id="SignatureTxtBox" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
-                        </textarea>
-                    <br>
-                    <p>Подпись №2:</p>
-                    <textarea id="SignatureTxtBox2" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
-                        </textarea>
+                    <div class="documents-list-text-container" id="documents-list-text-container"></div>
+
+                    <p class="documents-text" id="info_msg" name="SignatureTitle">Подпись</p>
+                    <p class="documents-text" id="info_msg2" name ="TimeTitle">Время выполнения: </p>
+                    <p class="documents-text" id="info_msg3" name="filesLeft">Файлов подписано:</p>
                 </div>
                 <div class="steps-container">
-                    <p class="step-one"><i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i> Список документов</p>
+                    <div class="step currentStep" id="first-step">
+                        <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i><p class="steps-text">Список документов</p>
+                    </div>
+                    <div class="dash"></div>
+
+                    <div class="step nextStep" id="second-step">
+                        <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i><p class="steps-text">Подпись доктора</p>
+                    </div>
+                    <div class="dash"></div>
+
+                    <div class="step nextStep" id="third-step">
+                        <i class="fa fa-check-circle-o fa-2x" aria-hidden="true"></i><p class="steps-text">Подпись организации</p>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="user-data-container">
             <div class="doctor-name-container">
-                <form class="doctor-name">
+                <form class="doctor-name" id="doctor-name">
                     <div>
                         <label for="CertListBox" class="label">Подписать от имени</label>
                         <br>
@@ -85,48 +65,46 @@
                                             в доверенные.
                                         </span>
                         </div>
-                        <input id="SignBtn" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="
-                                                    if ('' == openFileButton.value)
-                                                        { alert('Файлы не выбраны.'); return; }
-                                                    else
-                                                        if ('' == fileContent[0])
-                                                        {
-                                                            console.log(fileContent);
-                                                            alert('Выбран пустой файл');
-                                                            return;
-                                                        }
-                                                    else
-                                                        Common_SignCadesBES_File('CertListBox')" />
+                        <input id="SignBtn" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="doctorSig()"/>
 
                     </div>
                 </form>
 
-                <form class="organization-name">
+                <form class="organization-name invisible" id="organization-name">
                     <div>
                         <label for="CertListBox2" class="label">Подписать от Организации</label>
                         <br>
                         <select id="CertListBox2" name="CertListBox2" class="input_field">
                         </select>
 
-                        <input id="SignBtn2" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="
-                                                    if ('' == openFileButton.value)
-                                                        { alert('Файлы не выбраны.'); return; }
-                                                    else
-                                                        if ('' == fileContent[0])
-                                                        {
-                                                            console.log(fileContent);
-                                                            alert('Выбран пустой файл');
-                                                            return;
-                                                        }
-                                                    else
-                                                        Common_SignCadesBES_File('CertListBox2')"  />
+                        <input id="SignBtn2" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="organizationSig()"  />
                     </div>
                 </form>
             </div>
+            <p class="documents-text invisible">Подпись №1:</p>
+            <textarea class="invisible" id="SignatureTxtBox" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
+                        </textarea>
+            <br>
+            <p class="invisible">Подпись №2:</p>
+            <textarea class="invisible" id="SignatureTxtBox2" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
+                        </textarea>
         </div>
     </section>
+    <div class="diagram progress invisible" id="diagram-progress" data-percent="0">
+        <div class="piece left"></div>
+        <div class="piece right"></div>
+        <div class="text">
+            <div>
+                <b id="diagram-b"></b>
+                <span>PERCENT</span>
+            </div>
+        </div>
+    </div>
     <script src="./src/cadesplugin_api.js"></script>
     <script src="./src/js/code.js"></script>
     <script src="./src/js/onload.js"></script>
+    <script src="src/js/openFile.js"></script>
+    <script src="src/js/doctorSig.js"></script>
+    <script src="src/js/organizationSig.js"></script>
 </body>
 </html>

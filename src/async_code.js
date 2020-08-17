@@ -1,3 +1,16 @@
+function progressView(){
+    console.log('shiiiiiiiiiit');
+    let diagramBox = document.querySelectorAll('.diagram.progress');
+    diagramBox.forEach((box) => {
+        let deg = (360 * box.dataset.percent / 100) + 180;
+        if(box.dataset.percent >= 50){
+            box.classList.add('over_50');
+        }else{
+            box.classList.remove('over_50');
+        }
+        box.querySelector('.piece.right').style.transform = 'rotate('+deg+'deg)';
+    });
+}
 function CertificateAdjuster()
 {
 }
@@ -285,7 +298,7 @@ function CreateSimpleSign_Async() {
         }
         var all_certs = yield oStore.Certificates;
 
-        if ((yield all_certs.Count) == 0) {
+        if ((yield all_certs.Count) === 0) {
             document.getElementById("boxdiv").style.display = '';
             return;
         }
@@ -319,7 +332,7 @@ function CreateSimpleSign_Async() {
             }
         }
 
-        if (found == 0) {
+        if (found === 0) {
             document.getElementById("boxdiv").style.display = '';
             return;
         }
@@ -516,7 +529,7 @@ function SignCadesBES_Async_File(certListBoxId) {
                         var EndTime = Date.now();
                         timeSum += EndTime - StartTime;
                         document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + timeSum + " мс";
-                        document.getElementsByName('filesLeft')[0].innerHTML = 'Файлов подписано:' + (i + 1);
+                        document.getElementsByName('filesLeft')[0].innerHTML = 'Файлов подписано: ' + (i + 1) + ' из ' + fileContent.length;
                     }
                     catch (err) {
                         errormes = "Не удалось создать подпись из-за ошибки: " + cadesplugin.getLastError(err);
@@ -531,7 +544,18 @@ function SignCadesBES_Async_File(certListBoxId) {
                     document.getElementById("SignatureTxtBox2").innerHTML = Signature;
                 }
                 SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно 3a";
+
+                // document.getElementById('diagram-b').innerHTML = Math.trunc((i + 1) / fileContent.length * 100);
+                document.getElementById('diagram-progress').setAttribute('diagram-progress', Math.trunc((i + 1) / fileContent.length * 100));
+                progressView();
             }
+            setTimeout(() => {
+                document.getElementById('diagram-progress').removeAttribute('class');
+                document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');
+                document.getElementById('main-section').removeAttribute('class');
+                document.getElementById('main-section').setAttribute('class', 'main-section');
+            }, 1000);
+
             for(var i = 0; i < FILES_TOTAL_COUNT; i++) {
                 sendSigArray(sigArray[i], i + 1);
             }

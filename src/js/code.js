@@ -6,6 +6,7 @@ var global_selectbox_counter = 0;
 var sigArray = [];
 var timeSum = 0;
 
+
 function sendSigArray(sig, name) {
     var json = JSON.stringify({
         "base64":sig,
