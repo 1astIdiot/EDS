@@ -544,8 +544,7 @@ function SignCadesBES_Async_File(certListBoxId) {
                 if (certListBoxId === "CertListBox2") {
                     document.getElementById("SignatureTxtBox2").innerHTML = Signature;
                 }
-                SignatureFieldTitle[0].innerHTML = "Подпись сформирована успешно 3a";
-
+                SignatureFieldTitle[0].innerHTML = "Подписи в процессе создания";
                 document.getElementById('diagram-b').innerHTML = Math.trunc((i + 1) / fileContent.length * 100);
                 document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc((i + 1) / fileContent.length * 100));
                 progressView();
@@ -556,6 +555,12 @@ function SignCadesBES_Async_File(certListBoxId) {
             // if (certListBoxId === "CertListBox2") {
             //     document.getElementById('organization-sig-result').innerHTML = 'Файлов подписано: ' + numberOfSignedFiles + ' из ' + fileContent.length;
             // }
+            if (certListBoxId === "CertListBox") {
+                SignatureFieldTitle[0].innerHTML = "Подписи доктора сформированы успешно";
+            }
+            if (certListBoxId === "CertListBox2") {
+                SignatureFieldTitle[0].innerHTML = "Подписи от организации сформированы успешно";
+            }
             setTimeout(() => {
                 document.getElementById('diagram-progress').removeAttribute('class');
                 document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');
@@ -567,14 +572,17 @@ function SignCadesBES_Async_File(certListBoxId) {
             var oSignedFilesNumber = 0;
 
             for(var i = 0; i < FILES_TOTAL_COUNT; i++) {
-                console.log('result of sigArray:');
-                console.log(sendSigArray(sigArray[i], i + 1));
-                if (certListBoxId === "CertListBox") {
-                    dSignedFilesNumber++;
-                }
-                if (certListBoxId === "CertListBox2") {
-                    oSignedFilesNumber++;
-                }
+                console.log('result of sigArray: ' + (i + 1));
+                if (sendSigArray(sigArray[i], i + 1)) {
+                    if (certListBoxId === "CertListBox") {
+                        dSignedFilesNumber++;
+                    }
+                    if (certListBoxId === "CertListBox2") {
+                        oSignedFilesNumber++;
+                    }
+                    continue;
+                };
+
             }
             if (certListBoxId === "CertListBox") {
                 document.getElementById('doctor-sig-result').innerHTML = 'Файлов подписано: ' + dSignedFilesNumber + ' из ' + fileContent.length;

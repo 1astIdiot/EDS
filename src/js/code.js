@@ -83,34 +83,6 @@ function Common_RetrieveCertificate()
     }
 }
 
-function Common_CreateSimpleSign(id)
-{
-    var canAsync = !!cadesplugin.CreateObjectAsync;
-    if(canAsync)
-    {
-        include_async_code().then(function(){
-            return CreateSimpleSign_Async(id);
-        });
-    }else
-    {
-        return CreateSimpleSign_NPAPI(id);
-    }
-}
-
-function Common_SignCadesBES(id, text, setDisplayData)
-{
-    var canAsync = !!cadesplugin.CreateObjectAsync;
-    if(canAsync)
-    {
-        include_async_code().then(function(){
-            return SignCadesBES_Async(id, text, setDisplayData);
-        });
-    }else
-    {
-        return SignCadesBES_NPAPI(id, text, setDisplayData);
-    }
-}
-
 function Common_SignCadesBES_File(id) {
     var canAsync = !!cadesplugin.CreateObjectAsync;
     if (canAsync) {
@@ -136,19 +108,6 @@ function Common_SignCadesEnhanced(id, sign_type)
     }
 }
 
-function Common_SignCadesXML(id, signatureType)
-{
-    var canAsync = !!cadesplugin.CreateObjectAsync;
-    if(canAsync)
-    {
-        include_async_code().then(function(){
-            return SignCadesXML_Async(id, signatureType);
-        });
-    }else
-    {
-        return SignCadesXML_NPAPI(id, signatureType);
-    }
-}
 
 function Common_CheckForPlugIn() {
     cadesplugin.set_log_level(cadesplugin.LOG_LEVEL_DEBUG);
@@ -164,36 +123,36 @@ function Common_CheckForPlugIn() {
     }
 }
 
-function Common_Encrypt() {
-    var canAsync = !!cadesplugin.CreateObjectAsync;
-    if(canAsync)
-    {
-        include_async_code().then(function(){
-            return Encrypt_Async();
-        });
-    }else
-    {
-        return Encrypt_NPAPI();
-    }
-}
-
-function Common_Decrypt(id) {
-    var canAsync = !!cadesplugin.CreateObjectAsync;
-    if(canAsync)
-    {
-        include_async_code().then(function(){
-            return Decrypt_Async(id);
-        });
-    }else
-    {
-        return Decrypt_NPAPI(id);
-    }
-}
+// function Common_Encrypt() {
+//     var canAsync = !!cadesplugin.CreateObjectAsync;
+//     if(canAsync)
+//     {
+//         include_async_code().then(function(){
+//             return Encrypt_Async();
+//         });
+//     }else
+//     {
+//         return Encrypt_NPAPI();
+//     }
+// }
+//
+// function Common_Decrypt(id) {
+//     var canAsync = !!cadesplugin.CreateObjectAsync;
+//     if(canAsync)
+//     {
+//         include_async_code().then(function(){
+//             return Decrypt_Async(id);
+//         });
+//     }else
+//     {
+//         return Decrypt_NPAPI(id);
+//     }
+// }
 
 function GetCertificate_NPAPI(certListBoxId) {
     var e = document.getElementById(certListBoxId);
     var selectedCertID = e.selectedIndex;
-    if (selectedCertID == -1) {
+    if (selectedCertID === -1) {
         alert("Select certificate");
         return;
     }
@@ -204,15 +163,15 @@ function FillCertInfo_NPAPI(certificate, certBoxId, isFromContainer)
 {
     var BoxId;
     var field_prefix;
-    if(typeof(certBoxId) == 'undefined' || certBoxId == "CertListBox")
+    if(typeof(certBoxId) == 'undefined' || certBoxId === "CertListBox")
     {
         alert('KekSync');
         BoxId = 'cert_info';
         field_prefix = '';
-    }else if (certBoxId == "CertListBox1") {
+    }else if (certBoxId === "CertListBox1") {
         BoxId = 'cert_info1';
         field_prefix = 'cert_info1';
-    } else if (certBoxId == "CertListBox2") {
+    } else if (certBoxId === "CertListBox2") {
         BoxId = 'cert_info2';
         field_prefix = 'cert_info2';
     } else {
@@ -452,11 +411,11 @@ function GetSignatureTitleElement()
     var elementSignatureTitle = null;
     var x = document.getElementsByName("SignatureTitle");
 
-    if(x.length == 0)
+    if(x.length === 0)
     {
         elementSignatureTitle = document.getElementById("SignatureTxtBox").parentNode.previousSibling;
 
-        if(elementSignatureTitle.nodeName == "P")
+        if(elementSignatureTitle.nodeName === "P")
         {
             return elementSignatureTitle;
         }
@@ -583,11 +542,11 @@ function CheckForPlugIn_NPAPI() {
             return -1;
         var arr = StringVersion.split('.');
 
-        if(ObjectVersion.MajorVersion == parseInt(arr[0]))
+        if(ObjectVersion.MajorVersion === parseInt(arr[0]))
         {
-            if(ObjectVersion.MinorVersion == parseInt(arr[1]))
+            if(ObjectVersion.MinorVersion === parseInt(arr[1]))
             {
-                if(ObjectVersion.BuildVersion == parseInt(arr[2]))
+                if(ObjectVersion.BuildVersion === parseInt(arr[2]))
                 {
                     return 0;
                 }
@@ -636,7 +595,7 @@ function CheckForPlugIn_NPAPI() {
             document.getElementById('CSPVersionTxt').innerHTML = "Версия криптопровайдера: " + GetCSPVersion_NPAPI();
         }
         var sCSPName = GetCSPName_NPAPI();
-        if(sCSPName!="")
+        if(sCSPName!=="")
         {
             document.getElementById('CSPNameTxt').innerHTML = "Криптопровайдер: " + sCSPName;
         }
@@ -646,8 +605,8 @@ function CheckForPlugIn_NPAPI() {
         xmlhttp.open("GET", "/sites/default/files/products/cades/latest_2_0.txt", true);
         xmlhttp.onreadystatechange = function() {
             var PluginBaseVersion;
-            if (xmlhttp.readyState == 4) {
-                if(xmlhttp.status == 200) {
+            if (xmlhttp.readyState === 4) {
+                if(xmlhttp.status === 200) {
                     PluginBaseVersion = xmlhttp.responseText;
                     if (isPluginWorked) { // плагин работает, объекты создаются
                         if (VersionCompare_NPAPI(PluginBaseVersion, CurrentPluginVersion)<0) {
@@ -1386,14 +1345,4 @@ var Base64 = {
         return string;
     }
 
-}
-
-
-
-function ShowPinPadelogin(){
-    var loginvalue = document.getElementById('Login').value;
-    var text = '<!PINPADFILE UTF8><N>Авторизация<V><N>Подтвердите авторизацию на сайте<V>'
-        + 'cryptopro.ru'
-        + '<N>Вход будет произведен с логином<V>' + loginvalue;
-    Common_SignCadesBES('CertListBox',text, 1);
 }
