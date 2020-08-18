@@ -1,5 +1,6 @@
 timeSum = 0;
 var openFile = function(event) {
+
     fileContent = [];
     var input = event.target;
     var filesDataArray = [];

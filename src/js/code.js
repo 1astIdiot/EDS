@@ -10,22 +10,24 @@ var timeSum = 0;
 function sendSigArray(sig, name) {
     var json = JSON.stringify({
         "base64":sig,
-        "fileName":"D:\\ECP\\" + name + ".sig"
+        "fileName":"//Users//admin//Documents//ecp//" + name + ".sig"
     });
 
     let xhr = new XMLHttpRequest();
     xhr.open('POST', 'http://localhost:8098/api/bregis/sign/saveSign', true);
 
     try {
-        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+        // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
         xhr.send(json);
         xhr.onload = function() {
             console.log("файл " + name + " загружен");
         }
+        return true;
     }
     catch(err) {
         console.log('ИИИ тут ошибка:');
         console.log(err);
+        return false;
     }
 
 }

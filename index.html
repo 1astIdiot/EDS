@@ -21,7 +21,7 @@
                         <p class="subtitle-text">Документы на подпись</p>
                     </div>
                     <div>
-                        <input id="openFileButton" type='file' multiple onchange="openFile(event)" style="width:100%">
+                        <input id="openFileButton" accept=".a" type='file' multiple onchange="openFile(event)" style="width:100%">
                     </div>
                 </div>
                 <div class="documents-list">
@@ -66,7 +66,8 @@
                                         </span>
                         </div>
                         <input id="SignBtn" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="doctorSig()"/>
-
+                    </div>
+                    <div class="doctor-sig-result" id="doctor-sig-result">
                     </div>
                 </form>
 
@@ -78,6 +79,8 @@
                         </select>
 
                         <input id="SignBtn2" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="organizationSig()"  />
+                    </div>
+                    <div class="organization-sig-result" id="organization-sig-result">
                     </div>
                 </form>
             </div>
