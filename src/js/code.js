@@ -7,30 +7,41 @@ var sigArray = [];
 var timeSum = 0;
 
 
-function sendSigArray(sig, name) {
+async function sendSigArray(sig, name) {
     var json = JSON.stringify({
-        "base64":sig,
-        "fileName":"D:\\ECP\\" + name + ".sig"
+        "base64": sig,
+        "fileName": "//Users//admin//Documents//ecp//" + name + ".sig"
     });
 
-    let xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8098/api/bregis/sign/saveSign', true);
-
+    // let xhr = new XMLHttpRequest();
+    // xhr.open('POST', 'http://localhost:8098/api/bregis/sign/saveSign', true);
+    //
+    // let xhr2 = new XMLHttpRequest();
+    // xhr2.open('GET', 'http://localhost:8098/api/bregis/sign/checkAvailable', true);
+    // xhr2.send();
     // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+    //
+    // try {
+    //     xhr.send(json);
+    //     xhr.onload = function() {
+    //         console.log("файл " + name + " загружен");
+    //     }
+    //     return true;
+    // }
+    // catch(err) {
+    //     console.log('ИИИ тут ошибка:');
+    //     console.log(err);
+    //     return false;
+    // }
 
-    try {
-        xhr.send(json);
-        xhr.onload = function() {
-            console.log("файл " + name + " загружен");
-        }
-        return true;
-    }
-    catch(err) {
-        console.log('ИИИ тут ошибка:');
-        console.log(err);
-        return false;
-    }
-
+    let response = await fetch('http://localhost:8098/api/bregis/sign/saveSign', {
+        method: 'POST',
+        body: json,
+    });
+    let result = await response.json();
+    alert(result.message);
+    console.log('И результат:');
+    console.log(result);
 }
 
 function getXmlHttp(){

@@ -180,7 +180,7 @@
 
 
 .dash {
-    width: 100px;
+    min-width: 100px;
     height: 0;
     border: 1px solid black;
 }

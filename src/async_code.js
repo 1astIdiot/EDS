@@ -549,12 +549,14 @@ function SignCadesBES_Async_File(certListBoxId) {
                 document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc((i + 1) / fileContent.length * 100));
                 progressView();
             }
+
             // if (certListBoxId === "CertListBox") {
             //     document.getElementById('doctor-sig-result').innerHTML = 'Файлов подписано: ' + numberOfSignedFiles + ' из ' + fileContent.length;
             // }
             // if (certListBoxId === "CertListBox2") {
             //     document.getElementById('organization-sig-result').innerHTML = 'Файлов подписано: ' + numberOfSignedFiles + ' из ' + fileContent.length;
             // }
+
             if (certListBoxId === "CertListBox") {
                 SignatureFieldTitle[0].innerHTML = "Подписи доктора сформированы успешно";
             }
@@ -581,8 +583,7 @@ function SignCadesBES_Async_File(certListBoxId) {
                         oSignedFilesNumber++;
                     }
                     continue;
-                };
-
+                }
             }
             if (certListBoxId === "CertListBox") {
                 document.getElementById('doctor-sig-result').innerHTML = 'Файлов подписано: ' + dSignedFilesNumber + ' из ' + fileContent.length;

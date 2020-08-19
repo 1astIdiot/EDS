@@ -23,8 +23,8 @@ function doctorSig(attr) {
     document.getElementById('openFileButton').setAttribute('disabled', 'disabled');
 
     document.getElementById('organization-name').setAttribute('class', 'organization-name currentStep');
-    document.getElementById('second-step').setAttribute('class', 'nextStep');
-    document.getElementById('third-step').setAttribute('class', 'currentStep');
+    document.getElementById('second-step').setAttribute('class', 'step nextStep');
+    document.getElementById('third-step').setAttribute('class', 'step currentStep');
 }
 
 // function progressView(){

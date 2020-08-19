@@ -24,8 +24,8 @@ var openFile = function(event) {
         })(input.files[i]);
     }
 
-    document.getElementById('first-step').setAttribute('class', 'nextStep');
-    document.getElementById('second-step').setAttribute('class', 'currentStep');
+    document.getElementById('first-step').setAttribute('class', 'step nextStep');
+    document.getElementById('second-step').setAttribute('class', 'step currentStep');
     a.innerHTML = tmpStr;
 
 };

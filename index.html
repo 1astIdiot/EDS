@@ -21,11 +21,21 @@
                         <p class="subtitle-text">Документы на подпись</p>
                     </div>
                     <div>
-                        <input id="openFileButton" accept=".pdf" type='file' multiple onchange="openFile(event)" style="width:100%">
+                        <input id="openFileButton" accept=".a" type='file' multiple onchange="openFile(event)" style="width:100%">
                     </div>
                 </div>
                 <div class="documents-list">
-                    <div class="documents-list-text-container" id="documents-list-text-container"></div>
+                    <div class="documents-list-text-container" id="documents-list-text-container">
+                        <div id="boxdiv" style="display: none;">
+                                        <span id="errorarea">
+                                            У вас отсутствуют личные сертификаты. Вы можете
+                                            <a href="#" onclick="Common_RetrieveCertificate();" style="color:#0837ff"> получить</a>
+                                            сертификат от тестового УЦ, предварительно установив
+                                            <a href="https://testca.cryptopro.ru/certsrv/certnew.cer?ReqID=CACert&amp;Renewal=1&amp;Enc=bin" style="color:#0837ff">корневой сертификат тестового УЦ</a>
+                                            в доверенные.
+                                        </span>
+                        </div>
+                    </div>
 
                     <p class="documents-text" id="info_msg" name="SignatureTitle">Подпись</p>
                     <p class="documents-text" id="info_msg2" name ="TimeTitle">Время выполнения: </p>
@@ -56,15 +66,6 @@
                         <br>
                         <select id="CertListBox" name="CertListBox" class="input_field">
                         </select>
-                        <div id="boxdiv" style="display: none;">
-                                        <span id="errorarea">
-                                            У вас отсутствуют личные сертификаты. Вы можете
-                                            <a href="#" onclick="Common_RetrieveCertificate();" style="color:#0837ff"> получить</a>
-                                            сертификат от тестового УЦ, предварительно установив
-                                            <a href="https://testca.cryptopro.ru/certsrv/certnew.cer?ReqID=CACert&amp;Renewal=1&amp;Enc=bin" style="color:#0837ff">корневой сертификат тестового УЦ</a>
-                                            в доверенные.
-                                        </span>
-                        </div>
                         <input id="SignBtn" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="doctorSig()"/>
                     </div>
                     <div class="doctor-sig-result" id="doctor-sig-result">
