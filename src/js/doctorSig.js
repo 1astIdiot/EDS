@@ -13,9 +13,9 @@ function doctorSig(attr) {
             return;
         }
         else {
+            Common_SignCadesBES_File('CertListBox');
             document.getElementById('main-section').setAttribute('class', 'main-section semi-invisible');
             document.getElementById('diagram-progress').setAttribute('class', 'diagram progress visible');
-            Common_SignCadesBES_File('CertListBox')
         }
 
     document.getElementById('CertListBox').setAttribute('disabled', 'disabled');

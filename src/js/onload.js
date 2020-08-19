@@ -11,19 +11,22 @@ if(isEdge()) {
                 Common_CheckForPlugIn();
             },
             function(error) {
-            console.log('Ошибка:');
-            console.log(error);
-            // document.getElementById('PluginEnabledImg').setAttribute("src", "Img/red_dot.png");
-                // document.getElementById('PlugInEnabledTxt').innerHTML = error;
+                document.getElementById('openFileButton').setAttribute('disabled', 'disabled');
+                document.getElementById('CertListBox').setAttribute('disabled', 'disabled');
+                document.getElementById('SignBtn').setAttribute('disabled', 'disabled');
+                document.getElementById('documents-list-text-container').innerHTML = "Плагин не найден!";
+                alert('Плагин CryptoPro Extension for CAdES Browser Plug-in не найден');
             }
         );
     } else {
         window.addEventListener("message", function (event){
-                if (event.data == "cadesplugin_loaded") {
+                if (event.data === "cadesplugin_loaded") {
                     CheckForPlugIn_NPAPI();
-                } else if(event.data == "cadesplugin_load_error") {
-                    document.getElementById('PluginEnabledImg').setAttribute("src", "Img/red_dot.png");
-                    document.getElementById('PlugInEnabledTxt').innerHTML = "Плагин не загружен";
+                } else if(event.data === "cadesplugin_load_error") {document.getElementById('openFileButton').setAttribute('disabled', 'disabled');
+                    document.getElementById('CertListBox').setAttribute('disabled', 'disabled');
+                    document.getElementById('SignBtn').setAttribute('disabled', 'disabled');
+                    document.getElementById('documents-list-text-container').innerHTML = "Плагин не найден!";
+                    alert('Плагин CryptoPro Extension for CAdES Browser Plug-in не найден');
                 }
             },
             false);
