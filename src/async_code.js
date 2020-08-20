@@ -574,27 +574,48 @@ function SignCadesBES_Async_File(certListBoxId) {
             }, 1000);
 
 
-            let tmpPromise = Promise.all(sigArray.map((item, i) => sendSig(item, i + 1).then((result) => {
-                console.log('aaaand result of promise is:');
-                console.log(result);
-                if (certListBoxId === "CertListBox") {
-                    dSignedFilesNumber++;
-                }
-                if (certListBoxId === "CertListBox2") {
-                    oSignedFilesNumber++;
-                }
-            })
-                .catch((err) => {
-                    console.log('aaaaand error of the promise:');
-                    console.log(err);
-                    if (certListBoxId === "CertListBox") {""
-                        dSigErrorInfo = err;
+            let tmpPromiseArray;
+
+            if (certListBoxId === 'CertListBox') {
+                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'd_' + (i + 1)).then((result) => {
+                    if (certListBoxId === "CertListBox") {
+                        dSignedFilesNumber++;
                     }
                     if (certListBoxId === "CertListBox2") {
-                        oSigErrorInfo = err;
+                        oSignedFilesNumber++;
                     }
+                })
+                    .catch((err) => {
+                        if (certListBoxId === "CertListBox") {
+                            dSigErrorInfo = err;
+                        }
+                        if (certListBoxId === "CertListBox2") {
+                            oSigErrorInfo = err;
+                        }
 
-                })));
+                    }))
+            }
+            if (certListBoxId === 'CertListBox2') {
+                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'org_' + (i + 1)).then((result) => {
+                    if (certListBoxId === "CertListBox") {
+                        dSignedFilesNumber++;
+                    }
+                    if (certListBoxId === "CertListBox2") {
+                        oSignedFilesNumber++;
+                    }
+                })
+                    .catch((err) => {
+                        if (certListBoxId === "CertListBox") {
+                            dSigErrorInfo = err;
+                        }
+                        if (certListBoxId === "CertListBox2") {
+                            oSigErrorInfo = err;
+                        }
+
+                    }))
+            }
+
+            let tmpPromise = Promise.all(tmpPromiseArray);
                 tmpPromise.then(() => {
                     if (certListBoxId === "CertListBox") {
                         document.getElementById('doctor-sig-result').innerHTML = 'Подписей сохранено: ' + dSignedFilesNumber + ' из ' + fileContent.length;
