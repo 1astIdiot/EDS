@@ -5,9 +5,13 @@ var global_isFromCont = new Array();
 var global_selectbox_counter = 0;
 var sigArray = [];
 var timeSum = 0;
+var dSignedFilesNumber = 0;
+var oSignedFilesNumber = 0;
+var dSigErrorInfo = '';
+var oSigErrorInfo = '';
 
 
-async function sendSigArray(sig, name) {
+async function sendSig(sig, name) {
     var json = JSON.stringify({
         "base64": sig,
         "fileName": "//Users//admin//Documents//ecp//" + name + ".sig"
@@ -36,12 +40,15 @@ async function sendSigArray(sig, name) {
 
     let response = await fetch('http://localhost:8098/api/bregis/sign/saveSign', {
         method: 'POST',
-        body: json,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: json
     });
-    let result = await response.json();
-    alert(result.message);
-    console.log('И результат:');
-    console.log(result);
+    return response;
+    // let result = await response.json();
+    // console.log('И результат:');
+    // console.log(result);
 }
 
 function getXmlHttp(){
@@ -793,6 +800,7 @@ function GetFirstCert_NPAPI() {
     }
     catch (ex) {
         oStore.Close();
+        document.getElementById('documents-list-text-container').setAttribute('class', 'errorArea');
         document.getElementById("boxdiv").style.display = '';
         return;
     }
@@ -939,6 +947,7 @@ function FillCertList_NPAPI(lstId) {
     catch (ex) {
     }
     if(global_selectbox_container.length == 0) {
+        document.getElementById('documents-list-text-container').setAttribute('class', 'errorArea');
         document.getElementById("boxdiv").style.display = '';
     }
 }

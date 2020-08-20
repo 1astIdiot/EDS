@@ -281,6 +281,7 @@ function FillCertList_Async(lstId, secondId) {
         catch (ex) {
         }
         if(global_selectbox_container.length == 0) {
+            document.getElementById('documents-list-text-container').setAttribute('class', 'errorArea');
             document.getElementById("boxdiv").style.display = '';
         }
     });//cadesplugin.async_spawn
@@ -298,6 +299,7 @@ function CreateSimpleSign_Async() {
         var all_certs = yield oStore.Certificates;
 
         if ((yield all_certs.Count) === 0) {
+            document.getElementById('documents-list-text-container').setAttribute('class', 'errorArea');
             document.getElementById("boxdiv").style.display = '';
             return;
         }
@@ -332,6 +334,7 @@ function CreateSimpleSign_Async() {
         }
 
         if (found === 0) {
+            document.getElementById('documents-list-text-container').setAttribute('class', 'errorArea');
             document.getElementById("boxdiv").style.display = '';
             return;
         }
@@ -570,27 +573,82 @@ function SignCadesBES_Async_File(certListBoxId) {
                 document.getElementById('main-section').setAttribute('class', 'main-section');
             }, 1000);
 
-            var dSignedFilesNumber = 0;
-            var oSignedFilesNumber = 0;
 
-            for(var i = 0; i < FILES_TOTAL_COUNT; i++) {
-                console.log('result of sigArray: ' + (i + 1));
-                if (sendSigArray(sigArray[i], i + 1)) {
+
+            var tmpArray = sigArray.map((item, i) => {
+                return sendSig(item, i + 1).then(() => {
                     if (certListBoxId === "CertListBox") {
                         dSignedFilesNumber++;
                     }
                     if (certListBoxId === "CertListBox2") {
                         oSignedFilesNumber++;
                     }
-                    continue;
-                }
-            }
-            if (certListBoxId === "CertListBox") {
-                document.getElementById('doctor-sig-result').innerHTML = 'Файлов подписано: ' + dSignedFilesNumber + ' из ' + fileContent.length;
-            }
-            if (certListBoxId === "CertListBox2") {
-                document.getElementById('organization-sig-result').innerHTML = 'Файлов подписано: ' + oSignedFilesNumber + ' из ' + fileContent.length;
-            }
+                })
+                    .catch((err) => {
+                        console.log('Ошибка при попытке сохранить файлы:');
+                        console.log(err);
+                        console.log('certListBoxId in catch is:');
+                        console.log(certListBoxId);
+
+                        if (certListBoxId === "CertListBox") {
+                            console.log('and im in the first if with:');
+                            console.log(err);
+                            dSigErrorInfo = err;
+                            console.log(dSigErrorInfo);
+                        }
+                        if (certListBoxId === "CertListBox2") {
+                            oSigErrorInfo = err;
+                        }
+
+                    });
+            })
+
+            console.log('tmpArray is:');
+            console.log(tmpArray);
+            Promise.all(tmpArray)
+                .then(() => {
+                    if (certListBoxId === "CertListBox") {
+                        document.getElementById('doctor-sig-result').innerHTML = 'Подписей сохранено: ' + dSignedFilesNumber + ' из ' + fileContent.length;
+                        if (dSignedFilesNumber !== fileContent.length) {
+                            console.log('Edik pidor');
+                            console.log(dSigErrorInfo);
+                        }
+                    }
+                    if (certListBoxId === "CertListBox2") {
+                        document.getElementById('organization-sig-result').innerHTML = 'Подписей сохранено: ' + oSignedFilesNumber + ' из ' + fileContent.length;
+                        if (oSignedFilesNumber !== fileContent.length) {
+                            console.log('And Edik snova Pidor');
+                            console.log(oSigErrorInfo);
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.log('Error in promise.all:')
+                    console.log(err);
+                });
+
+            // for(var i = 0; i < FILES_TOTAL_COUNT; i++) {
+            //     sendSig(sigArray[i], i + 1).then(() => {
+            //         if (certListBoxId === "CertListBox") {
+            //             dSignedFilesNumber++;
+            //         }
+            //         if (certListBoxId === "CertListBox2") {
+            //             oSignedFilesNumber++;
+            //         }
+            //     })
+            //         .catch((err) => {
+            //             console.log('Ошибка при попытке сохранить файлы:');
+            //             console.log(err);
+            //
+            //             if (certListBoxId === "CertListBox") {
+            //                 dSigErrorInfo = err;
+            //             }
+            //             if (certListBoxId === "CertListBox2") {
+            //                 oSigErrorInfo = err;
+            //             }
+            //
+            //         });
+            // }
             timeSum = 0;
         }
         catch(err)

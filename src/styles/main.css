@@ -137,6 +137,11 @@
     overflow-y: auto;
 }
 
+.errorArea {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 
 .steps-container {
     display: flex;
@@ -144,7 +149,7 @@
     justify-content: space-between;
     align-items: center;
 
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
 .step {
@@ -209,6 +214,10 @@
     /* Headings */
 
     color: #353645;
+}
+
+.doctor-sig-result {
+    font-size: 14px;
 }
 
 .label {
