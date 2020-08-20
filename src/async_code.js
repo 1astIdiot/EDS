@@ -574,51 +574,50 @@ function SignCadesBES_Async_File(certListBoxId) {
             }, 1000);
 
 
-
-            var tmpArray = sigArray.map((item, i) => {
-                return sendSig(item, i + 1).then(() => {
-                    if (certListBoxId === "CertListBox") {
-                        dSignedFilesNumber++;
+            let tmpPromise = Promise.all(sigArray.map((item, i) => sendSig(item, i + 1).then((result) => {
+                console.log('aaaand result of promise is:');
+                console.log(result);
+                if (certListBoxId === "CertListBox") {
+                    dSignedFilesNumber++;
+                }
+                if (certListBoxId === "CertListBox2") {
+                    oSignedFilesNumber++;
+                }
+            })
+                .catch((err) => {
+                    console.log('aaaaand error of the promise:');
+                    console.log(err);
+                    if (certListBoxId === "CertListBox") {""
+                        dSigErrorInfo = err;
                     }
                     if (certListBoxId === "CertListBox2") {
-                        oSignedFilesNumber++;
+                        oSigErrorInfo = err;
                     }
-                })
-                    .catch((err) => {
-                        console.log('Ошибка при попытке сохранить файлы:');
-                        console.log(err);
-                        console.log('certListBoxId in catch is:');
-                        console.log(certListBoxId);
 
-                        if (certListBoxId === "CertListBox") {
-                            console.log('and im in the first if with:');
-                            console.log(err);
-                            dSigErrorInfo = err;
-                            console.log(dSigErrorInfo);
-                        }
-                        if (certListBoxId === "CertListBox2") {
-                            oSigErrorInfo = err;
-                        }
-
-                    });
-            })
-
-            console.log('tmpArray is:');
-            console.log(tmpArray);
-            Promise.all(tmpArray)
-                .then(() => {
+                })));
+                tmpPromise.then(() => {
                     if (certListBoxId === "CertListBox") {
                         document.getElementById('doctor-sig-result').innerHTML = 'Подписей сохранено: ' + dSignedFilesNumber + ' из ' + fileContent.length;
                         if (dSignedFilesNumber !== fileContent.length) {
-                            console.log('Edik pidor');
-                            console.log(dSigErrorInfo);
+                            var div = document.createElement('div');
+                            div.id = 'documents-list-doctor-sign-error';
+
+                            document.getElementById('documents-list-text-container').innerHTML = '';
+                            document.getElementById('documents-list-text-container').style.gridTemplateColumns = '2fr 2fr';
+                            document.getElementById('documents-list-text-container').style.gridColumnGap = '20px';
+
+                            document.getElementById('documents-list-text-container').appendChild(div);
+                            document.getElementById('documents-list-doctor-sign-error').innerHTML = 'При сохранении подписей доктора в файл возникла ошибка \"' + dSigErrorInfo + '\" ';
                         }
                     }
                     if (certListBoxId === "CertListBox2") {
                         document.getElementById('organization-sig-result').innerHTML = 'Подписей сохранено: ' + oSignedFilesNumber + ' из ' + fileContent.length;
                         if (oSignedFilesNumber !== fileContent.length) {
-                            console.log('And Edik snova Pidor');
-                            console.log(oSigErrorInfo);
+                            var div2 = document.createElement('div');
+                            div2.id = 'documents-list-organization-sign-error';
+
+                            document.getElementById('documents-list-text-container').appendChild(div2);
+                            document.getElementById('documents-list-organization-sign-error').innerHTML = 'При сохранении подписей организации в файл возникла ошибка \"' + oSigErrorInfo + '\" ';
                         }
                     }
                 })

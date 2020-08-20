@@ -21,11 +21,11 @@
                         <p class="subtitle-text">Документы на подпись</p>
                     </div>
                     <div>
-                        <input id="openFileButton" accept=".a" type='file' multiple onchange="openFile(event)" style="width:100%">
+                        <input id="openFileButton" accept=".pdf" type='file' multiple onchange="openFile(event)" style="width:100%">
                     </div>
                 </div>
                 <div class="documents-list">
-                    <div class="documents-list-text-container" id="documents-list-text-contF ainer">
+                    <div class="documents-list-text-container" id="documents-list-text-container">
                         <div id="boxdiv" style="display: none;">
                                         <span id="errorarea">
                                             У вас отсутствуют личные сертификаты. Вы можете
@@ -76,21 +76,21 @@
                     <div>
                         <label for="CertListBox2" class="label">Подписать от Организации</label>
                         <br>
-                        <select id="CertListBox2" name="CertListBox2" class="input_field">
+                        <select id="CertListBox2" name="CertListBox2" class="input_field" disabled="disabled">
                         </select>
 
-                        <input id="SignBtn2" class="subscribe_button" type="button" value="Подписать" name="SignData" onclick="organizationSig()"  />
+                        <input id="SignBtn2" class="subscribe_button" type="button" value="Подписать" name="SignData" disabled="disabled" onclick="organizationSig()"  />
                     </div>
                     <div class="organization-sig-result" id="organization-sig-result">
                     </div>
                 </form>
             </div>
             <p class="documents-text invisible">Подпись №1:</p>
-            <textarea class="invisible" id="SignatureTxtBox" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
+            <textarea disabled="disabled" class="invisible" id="SignatureTxtBox" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
                         </textarea>
             <br>
             <p class="invisible">Подпись №2:</p>
-            <textarea class="invisible" id="SignatureTxtBox2" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
+            <textarea disabled="disabled" class="invisible" id="SignatureTxtBox2" readonly style="font-size:9pt;width:100%;resize:none;border:1px solid black;">
                         </textarea>
         </div>
     </section>

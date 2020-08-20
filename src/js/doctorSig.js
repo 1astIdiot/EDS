@@ -18,6 +18,9 @@ function doctorSig(attr) {
             document.getElementById('diagram-progress').setAttribute('class', 'diagram progress visible');
         }
 
+    document.getElementById('CertListBox2').removeAttribute('disabled');
+        document.getElementById('SignBtn2').removeAttribute('disabled');
+
     document.getElementById('CertListBox').setAttribute('disabled', 'disabled');
     document.getElementById('SignBtn').setAttribute('disabled', 'disabled');
     document.getElementById('openFileButton').setAttribute('disabled', 'disabled');

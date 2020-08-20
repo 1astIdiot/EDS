@@ -12,43 +12,26 @@ var oSigErrorInfo = '';
 
 
 async function sendSig(sig, name) {
-    var json = JSON.stringify({
-        "base64": sig,
-        "fileName": "//Users//admin//Documents//ecp//" + name + ".sig"
-    });
+    var newStr = sig.replace(/\r?\n/g, "");
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    var raw = JSON.stringify({"base64":newStr  ,"fileName":"/Users/admin/Documents/ecp/" + name + ".sig"});
 
-    // let xhr = new XMLHttpRequest();
-    // xhr.open('POST', 'http://localhost:8098/api/bregis/sign/saveSign', true);
-    //
-    // let xhr2 = new XMLHttpRequest();
-    // xhr2.open('GET', 'http://localhost:8098/api/bregis/sign/checkAvailable', true);
-    // xhr2.send();
-    // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-    //
-    // try {
-    //     xhr.send(json);
-    //     xhr.onload = function() {
-    //         console.log("файл " + name + " загружен");
-    //     }
-    //     return true;
-    // }
-    // catch(err) {
-    //     console.log('ИИИ тут ошибка:');
-    //     console.log(err);
-    //     return false;
-    // }
-
-    let response = await fetch('http://localhost:8098/api/bregis/sign/saveSign', {
+    var requestOptions = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: json
-    });
-    return response;
-    // let result = await response.json();
-    // console.log('И результат:');
-    // console.log(result);
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+    };
+
+    try {
+        var response = await fetch("http://localhost:8098/api/bregis/sign/saveSign", requestOptions);
+        return response.text();
+    }
+    catch(error) {
+        console.log(error);
+        return Promise.reject(error);
+    }
 }
 
 function getXmlHttp(){
