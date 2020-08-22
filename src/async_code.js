@@ -77,11 +77,11 @@ function CheckForPlugIn_Async() {
         var isActualVersion = true;
 
         cadesplugin.async_spawn(function *() {
-            if((yield ObjectVersion.MajorVersion) == parseInt(arr[0]))
+            if((yield ObjectVersion.MajorVersion) === parseInt(arr[0]))
             {
-                if((yield ObjectVersion.MinorVersion) == parseInt(arr[1]))
+                if((yield ObjectVersion.MinorVersion) === parseInt(arr[1]))
                 {
-                    if((yield ObjectVersion.BuildVersion) == parseInt(arr[2]))
+                    if((yield ObjectVersion.BuildVersion) === parseInt(arr[2]))
                     {
                         isActualVersion = true;
                     }
@@ -124,8 +124,8 @@ function CheckForPlugIn_Async() {
         xmlhttp.open("GET", "https://www.cryptopro.ru/sites/default/files/products/cades/latest_2_0.txt", true);
         xmlhttp.onreadystatechange = function() {
             var PluginBaseVersion;
-            if (xmlhttp.readyState == 4) {
-                if(xmlhttp.status == 200) {
+            if (xmlhttp.readyState === 4) {
+                if(xmlhttp.status === 200) {
                     PluginBaseVersion = xmlhttp.responseText;
                     VersionCompare_Async(PluginBaseVersion, CurrentPluginVersion)
                 }
@@ -219,10 +219,12 @@ function FillCertList_Async(lstId, secondId) {
                 var dateObj = new Date();
                 try {
                     var ValidFromDate = new Date((yield cert.ValidFromDate));
+                    console.log('Имя сертификата:');
+                    console.log(cert);
                     oOpt.text = new CertificateAdjuster().GetCertInfoString(yield cert.SubjectName, ValidFromDate);
                     oOpt2.text = new CertificateAdjuster().GetCertInfoString(yield cert.SubjectName, ValidFromDate);
-                    console.log('and certificate is:');
-                    console.log(cert);
+                    console.log('And really name is:');
+                    console.log(cert.SubjectName);
                 }
                 catch (ex) {
                     alert("Ошибка при получении свойства SubjectName: " + cadesplugin.getLastError(ex));
@@ -474,7 +476,7 @@ function SignCadesBES_Async_File(certListBoxId) {
     cadesplugin.async_spawn(function*(arg) {
         var e = document.getElementById(arg[0]);
         var selectedCertID = e.selectedIndex;
-        if (selectedCertID == -1) {
+        if (selectedCertID === -1) {
             alert("Select certificate");
             return;
         }
@@ -517,22 +519,20 @@ function SignCadesBES_Async_File(certListBoxId) {
 
             var oSignedData = yield cadesplugin.CreateObjectAsync("CAdESCOM.CadesSignedData");
             var CADES_BES = 1;
-            var dataToSign = fileContent[0]; // fileContent - объявлен в Code.js
             var numberOfSignedFiles = 0;
 
             for (var i = 0; i < fileContent.length; i++) {
-                if (dataToSign) {
+                // var dataToSign = fileContent[i]; // fileContent - объявлен в Code.js
+                let StartTime = Date.now();
+                if (fileContent[i]) {
                     // Данные на подпись ввели
                     yield oSignedData.propset_ContentEncoding(1); //CADESCOM_BASE64_TO_BINARY
-                    yield oSignedData.propset_Content(dataToSign);
+                    yield oSignedData.propset_Content(fileContent[i]);
                     yield oSigner.propset_Options(1); //CAPICOM_CERTIFICATE_INCLUDE_WHOLE_CHAIN
                     try {
-                        var StartTime = Date.now();
                         Signature = yield oSignedData.SignCades(oSigner, CADES_BES);
-                        var EndTime = Date.now();
-                        timeSum += EndTime - StartTime;
                         numberOfSignedFiles++;
-                        document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + timeSum + " мс";
+                        // document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + (timeSum / 1000) + "с";
                         document.getElementsByName('filesLeft')[0].innerHTML = 'Файлов подписано: ' + numberOfSignedFiles + ' из ' + fileContent.length;
                     }
                     catch (err) {
@@ -551,14 +551,11 @@ function SignCadesBES_Async_File(certListBoxId) {
                 document.getElementById('diagram-b').innerHTML = Math.trunc((i + 1) / fileContent.length * 100);
                 document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc((i + 1) / fileContent.length * 100));
                 progressView();
-            }
 
-            // if (certListBoxId === "CertListBox") {
-            //     document.getElementById('doctor-sig-result').innerHTML = 'Файлов подписано: ' + numberOfSignedFiles + ' из ' + fileContent.length;
-            // }
-            // if (certListBoxId === "CertListBox2") {
-            //     document.getElementById('organization-sig-result').innerHTML = 'Файлов подписано: ' + numberOfSignedFiles + ' из ' + fileContent.length;
-            // }
+                let EndTime = Date.now();
+                timeSum += EndTime - StartTime;
+                document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + (timeSum / 1000) + "с";
+            }
 
             if (certListBoxId === "CertListBox") {
                 SignatureFieldTitle[0].innerHTML = "Подписи доктора сформированы успешно";
@@ -566,18 +563,11 @@ function SignCadesBES_Async_File(certListBoxId) {
             if (certListBoxId === "CertListBox2") {
                 SignatureFieldTitle[0].innerHTML = "Подписи от организации сформированы успешно";
             }
-            setTimeout(() => {
-                document.getElementById('diagram-progress').removeAttribute('class');
-                document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');
-                document.getElementById('main-section').removeAttribute('class');
-                document.getElementById('main-section').setAttribute('class', 'main-section');
-            }, 1000);
 
 
             let tmpPromiseArray;
-
             if (certListBoxId === 'CertListBox') {
-                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'd_' + (i + 1)).then((result) => {
+                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'd_' + fileNames[i]).then((result) => {
                     if (certListBoxId === "CertListBox") {
                         dSignedFilesNumber++;
                     }
@@ -596,7 +586,7 @@ function SignCadesBES_Async_File(certListBoxId) {
                     }))
             }
             if (certListBoxId === 'CertListBox2') {
-                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'org_' + (i + 1)).then((result) => {
+                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'o_' + fileNames[i]).then((result) => {
                     if (certListBoxId === "CertListBox") {
                         dSignedFilesNumber++;
                     }
@@ -619,8 +609,21 @@ function SignCadesBES_Async_File(certListBoxId) {
                 tmpPromise.then(() => {
                     if (certListBoxId === "CertListBox") {
                         document.getElementById('doctor-sig-result').innerHTML = 'Подписей сохранено: ' + dSignedFilesNumber + ' из ' + fileContent.length;
+                        var div = document.createElement('div');
+
+                        if (dSignedFilesNumber === fileContent.length) {
+                            div.id = 'documents-list-doctor-sign-success';
+
+                            document.getElementById('documents-list-text-container').innerHTML = '';
+                            document.getElementById('documents-list-text-container').style.gridTemplateColumns = '2fr 2fr';
+                            document.getElementById('documents-list-text-container').style.gridColumnGap = '20px';
+
+                            document.getElementById('documents-list-text-container').appendChild(div);
+                            document.getElementById('documents-list-doctor-sign-success').innerHTML = 'Подписи доктора успешно сохранены';
+
+                        }
+
                         if (dSignedFilesNumber !== fileContent.length) {
-                            var div = document.createElement('div');
                             div.id = 'documents-list-doctor-sign-error';
 
                             document.getElementById('documents-list-text-container').innerHTML = '';
@@ -630,45 +633,49 @@ function SignCadesBES_Async_File(certListBoxId) {
                             document.getElementById('documents-list-text-container').appendChild(div);
                             document.getElementById('documents-list-doctor-sign-error').innerHTML = 'При сохранении подписей доктора в файл возникла ошибка \"' + dSigErrorInfo + '\" ';
                         }
+
+
+                        document.getElementById('diagram-span').innerHTML = '';
+                        document.getElementById('diagram-b').style.fontSize = '16px';
+                        document.getElementById('diagram-b').innerHTML = 'Сохранение в файл';
+                        setTimeout(() => {
+                            document.getElementById('diagram-progress').removeAttribute('class');
+                            document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');
+                            document.getElementById('main-section').removeAttribute('class');
+                            document.getElementById('main-section').setAttribute('class', 'main-section');
+                        }, 1000);
                     }
                     if (certListBoxId === "CertListBox2") {
                         document.getElementById('organization-sig-result').innerHTML = 'Подписей сохранено: ' + oSignedFilesNumber + ' из ' + fileContent.length;
+                        var div2 = document.createElement('div');
+
+                        if (oSignedFilesNumber === fileContent.length) {
+                            div2.id = 'documents-list-organization-sign-success';
+
+                            document.getElementById('documents-list-text-container').appendChild(div2);
+                            document.getElementById('documents-list-organization-sign-success').innerHTML = 'Подписи от организации успешно сохранены';
+                        }
+
                         if (oSignedFilesNumber !== fileContent.length) {
-                            var div2 = document.createElement('div');
                             div2.id = 'documents-list-organization-sign-error';
 
                             document.getElementById('documents-list-text-container').appendChild(div2);
                             document.getElementById('documents-list-organization-sign-error').innerHTML = 'При сохранении подписей организации в файл возникла ошибка \"' + oSigErrorInfo + '\" ';
                         }
+
+                        document.getElementById('diagram-span').innerHTML = '';
+                        document.getElementById('diagram-b').style.fontSize = '16px';
+                        document.getElementById('diagram-b').innerHTML = 'Сохранение в файл';
                     }
-                })
-                .catch((err) => {
-                    console.log('Error in promise.all:')
-                    console.log(err);
+
+                    setTimeout(() => {
+                        document.getElementById('diagram-progress').removeAttribute('class');
+                        document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');
+                        document.getElementById('main-section').removeAttribute('class');
+                        document.getElementById('main-section').setAttribute('class', 'main-section');
+                    }, 1000);
                 });
 
-            // for(var i = 0; i < FILES_TOTAL_COUNT; i++) {
-            //     sendSig(sigArray[i], i + 1).then(() => {
-            //         if (certListBoxId === "CertListBox") {
-            //             dSignedFilesNumber++;
-            //         }
-            //         if (certListBoxId === "CertListBox2") {
-            //             oSignedFilesNumber++;
-            //         }
-            //     })
-            //         .catch((err) => {
-            //             console.log('Ошибка при попытке сохранить файлы:');
-            //             console.log(err);
-            //
-            //             if (certListBoxId === "CertListBox") {
-            //                 dSigErrorInfo = err;
-            //             }
-            //             if (certListBoxId === "CertListBox2") {
-            //                 oSigErrorInfo = err;
-            //             }
-            //
-            //         });
-            // }
             timeSum = 0;
         }
         catch(err)

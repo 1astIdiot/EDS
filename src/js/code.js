@@ -1,5 +1,6 @@
 var isPluginEnabled = false;
 var fileContent = []; // Переменная для хранения информации из файла, значение присваивается в cades_bes_file.html
+var fileNames = [];
 var global_selectbox_container = new Array();
 var global_isFromCont = new Array();
 var global_selectbox_counter = 0;
