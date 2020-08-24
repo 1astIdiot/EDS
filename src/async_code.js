@@ -675,7 +675,17 @@ function SignCadesBES_Async_File(certListBoxId) {
                         document.getElementById('main-section').removeAttribute('class');
                         document.getElementById('main-section').setAttribute('class', 'main-section');
                     }, 1000);
-                });
+                })
+                    .catch((err) => {
+                        console.log('Возникла ошибка:');
+                        console.log(err);
+                        setTimeout(() => {
+                            document.getElementById('diagram-progress').removeAttribute('class');
+                            document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');
+                            document.getElementById('main-section').removeAttribute('class');
+                            document.getElementById('main-section').setAttribute('class', 'main-section');
+                        }, 1000);
+                    })
 
             timeSum = 0;
         }
