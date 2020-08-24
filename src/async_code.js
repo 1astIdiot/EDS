@@ -530,7 +530,8 @@ function SignCadesBES_Async_File(certListBoxId) {
                     yield oSignedData.propset_Content(fileContent[i]);
                     yield oSigner.propset_Options(1); //CAPICOM_CERTIFICATE_INCLUDE_WHOLE_CHAIN
                     try {
-                        Signature = yield oSignedData.SignCades(oSigner, CADES_BES);
+                        // Signature = yield oSignedData.SignCades(oSigner, CADES_BES);
+                        Signature = yield oSignedData.SignCades(oSigner, CADESCOM_CADES_BES, true);
                         numberOfSignedFiles++;
                         // document.getElementsByName('TimeTitle')[0].innerHTML = "Время выполнения: " + (timeSum / 1000) + "с";
                         document.getElementsByName('filesLeft')[0].innerHTML = 'Файлов подписано: ' + numberOfSignedFiles + ' из ' + fileContent.length;

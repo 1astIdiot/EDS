@@ -10,6 +10,7 @@ var dSignedFilesNumber = 0;
 var oSignedFilesNumber = 0;
 var dSigErrorInfo = '';
 var oSigErrorInfo = '';
+var CADESCOM_CADES_BES = 1;
 
 
 async function sendSig(sig, name) {
