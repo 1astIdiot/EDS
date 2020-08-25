@@ -549,7 +549,7 @@ function SignCadesBES_Async_File(certListBoxId) {
                     document.getElementById("SignatureTxtBox2").innerHTML = Signature;
                 }
                 SignatureFieldTitle[0].innerHTML = "Подписи в процессе создания";
-                document.getElementById('diagram-b').innerHTML = Math.trunc((i + 1) / fileContent.length * 100);
+                document.getElementById('diagram-b').innerHTML = Math.trunc((i + 1) / fileContent.length * 100) + '%';
                 document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc((i + 1) / fileContent.length * 100));
                 progressView();
 
@@ -565,48 +565,79 @@ function SignCadesBES_Async_File(certListBoxId) {
                 SignatureFieldTitle[0].innerHTML = "Подписи от организации сформированы успешно";
             }
 
+            setTimeout(() => {
+                document.getElementById('diagram-b').innerHTML = '';
+                document.getElementById('diagram-span').innerHTML = 'Сохранение в файл';
+                document.getElementById('diagram-progress').setAttribute('data-percent', '0');
+                progressView();
 
-            let tmpPromiseArray;
-            if (certListBoxId === 'CertListBox') {
-                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'd_' + fileNames[i]).then((result) => {
-                    if (certListBoxId === "CertListBox") {
-                        dSignedFilesNumber++;
-                    }
-                    if (certListBoxId === "CertListBox2") {
-                        oSignedFilesNumber++;
-                    }
-                })
-                    .catch((err) => {
+                let tmpPromiseArray;
+                let fileSavedIterator = 0;
+                if (certListBoxId === 'CertListBox') {
+                    tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'd_' + fileNames[i]).then((result) => {
+
                         if (certListBoxId === "CertListBox") {
-                            dSigErrorInfo = err;
+                            dSignedFilesNumber++;
                         }
                         if (certListBoxId === "CertListBox2") {
-                            oSigErrorInfo = err;
+                            oSignedFilesNumber++;
                         }
 
-                    }))
-            }
-            if (certListBoxId === 'CertListBox2') {
-                tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'o_' + fileNames[i]).then((result) => {
-                    if (certListBoxId === "CertListBox") {
-                        dSignedFilesNumber++;
-                    }
-                    if (certListBoxId === "CertListBox2") {
-                        oSignedFilesNumber++;
-                    }
-                })
-                    .catch((err) => {
+                        fileSavedIterator++;
+                        document.getElementById('diagram-b').innerHTML = Math.trunc(fileSavedIterator / fileContent.length * 100) + '%';
+                        document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc(fileSavedIterator / fileContent.length * 100));
+                        progressView();
+                    })
+                        .catch((err) => {
+                            if (certListBoxId === "CertListBox") {
+                                dSigErrorInfo = err;
+                            }
+                            if (certListBoxId === "CertListBox2") {
+                                oSigErrorInfo = err;
+                            }
+
+                            fileSavedIterator++;
+                            document.getElementById('diagram-b').innerHTML = Math.trunc(fileSavedIterator / fileContent.length * 100) + '%';
+                            document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc(fileSavedIterator / fileContent.length * 100));
+                            progressView();
+                        }));
+
+                }
+                fileSavedIterator = 0;
+                document.getElementById('diagram-progress').setAttribute('data-percent', '0');
+                if (certListBoxId === 'CertListBox2') {
+                    tmpPromiseArray = sigArray.map((item, i) => sendSig(item, 'o_' + fileNames[i]).then((result) => {
                         if (certListBoxId === "CertListBox") {
-                            dSigErrorInfo = err;
+                            dSignedFilesNumber++;
                         }
                         if (certListBoxId === "CertListBox2") {
-                            oSigErrorInfo = err;
+                            oSignedFilesNumber++;
                         }
 
-                    }))
-            }
+                        fileSavedIterator++;
+                        document.getElementById('diagram-b').innerHTML = Math.trunc(fileSavedIterator / fileContent.length * 100) + '%';
+                        document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc((i + 1) / fileContent.length * 100));
+                        progressView();
+                    })
+                        .catch((err) => {
+                            console.log('catch in second listBox! with:');
+                            console.log(i);
+                            if (certListBoxId === "CertListBox") {
+                                dSigErrorInfo = err;
+                            }
+                            if (certListBoxId === "CertListBox2") {
+                                oSigErrorInfo = err;
+                            }
 
-            let tmpPromise = Promise.all(tmpPromiseArray);
+                            fileSavedIterator++;
+                            document.getElementById('diagram-b').innerHTML = Math.trunc(fileSavedIterator / fileContent.length * 100) + '%';
+                            document.getElementById('diagram-progress').setAttribute('data-percent', Math.trunc(fileSavedIterator / fileContent.length * 100));
+                            progressView();
+                        }));
+                }
+                fileSavedIterator = 0;
+
+                let tmpPromise = Promise.all(tmpPromiseArray);
                 tmpPromise.then(() => {
                     if (certListBoxId === "CertListBox") {
                         document.getElementById('doctor-sig-result').innerHTML = 'Подписей сохранено: ' + dSignedFilesNumber + ' из ' + fileContent.length;
@@ -635,10 +666,6 @@ function SignCadesBES_Async_File(certListBoxId) {
                             document.getElementById('documents-list-doctor-sign-error').innerHTML = 'При сохранении подписей доктора в файл возникла ошибка \"' + dSigErrorInfo + '\" ';
                         }
 
-
-                        document.getElementById('diagram-span').innerHTML = '';
-                        document.getElementById('diagram-b').style.fontSize = '16px';
-                        document.getElementById('diagram-b').innerHTML = 'Сохранение в файл';
                         setTimeout(() => {
                             document.getElementById('diagram-progress').removeAttribute('class');
                             document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');
@@ -685,9 +712,10 @@ function SignCadesBES_Async_File(certListBoxId) {
                             document.getElementById('main-section').removeAttribute('class');
                             document.getElementById('main-section').setAttribute('class', 'main-section');
                         }, 1000);
-                    })
+                    });
 
-            timeSum = 0;
+                timeSum = 0;
+            }, 1500)
         }
         catch(err)
         {

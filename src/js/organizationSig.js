@@ -14,7 +14,7 @@ function organizationSig() {
             return;
         }
         else {
-            document.getElementById('diagram-span').innerHTML = 'PERCENT';
+            document.getElementById('diagram-span').innerHTML = '';
             document.getElementById('diagram-b').style.fontSize = '72px';
             document.getElementById('diagram-b').innerHTML = '';
             document.getElementById('diagram-progress').setAttribute('class', 'diagram progress visible');
