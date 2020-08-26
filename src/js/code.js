@@ -170,7 +170,6 @@ function FillCertInfo_NPAPI(certificate, certBoxId, isFromContainer)
     var field_prefix;
     if(typeof(certBoxId) == 'undefined' || certBoxId === "CertListBox")
     {
-        alert('KekSync');
         BoxId = 'cert_info';
         field_prefix = '';
     }else if (certBoxId === "CertListBox1") {
