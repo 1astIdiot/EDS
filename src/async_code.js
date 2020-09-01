@@ -219,12 +219,8 @@ function FillCertList_Async(lstId, secondId) {
                 var dateObj = new Date();
                 try {
                     var ValidFromDate = new Date((yield cert.ValidFromDate));
-                    console.log('Имя сертификата:');
-                    console.log(cert);
                     oOpt.text = new CertificateAdjuster().GetCertInfoString(yield cert.SubjectName, ValidFromDate);
                     oOpt2.text = new CertificateAdjuster().GetCertInfoString(yield cert.SubjectName, ValidFromDate);
-                    console.log('And really name is:');
-                    console.log(cert.SubjectName);
                 }
                 catch (ex) {
                     alert("Ошибка при получении свойства SubjectName: " + cadesplugin.getLastError(ex));
@@ -620,8 +616,6 @@ function SignCadesBES_Async_File(certListBoxId) {
                         progressView();
                     })
                         .catch((err) => {
-                            console.log('catch in second listBox! with:');
-                            console.log(i);
                             if (certListBoxId === "CertListBox") {
                                 dSigErrorInfo = err;
                             }
@@ -704,8 +698,6 @@ function SignCadesBES_Async_File(certListBoxId) {
                     }, 1000);
                 })
                     .catch((err) => {
-                        console.log('Возникла ошибка:');
-                        console.log(err);
                         setTimeout(() => {
                             document.getElementById('diagram-progress').removeAttribute('class');
                             document.getElementById('diagram-progress').setAttribute('class', 'diagram progress invisible');

@@ -17,7 +17,7 @@ async function sendSig(sig, name) {
     var newStr = sig.replace(/\r?\n/g, "");
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-    var raw = JSON.stringify({"base64":newStr  ,"fileName":"D:\\ECP\\" + name + ".sig"});
+    var raw = JSON.stringify({"base64":newStr , "fileName": name + ".sig"});
     // /Users/admin/Documents/ecp/
 
     var requestOptions = {
