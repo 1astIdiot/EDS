@@ -10,6 +10,7 @@ if(isEdge()) {
         document.getElementById('openFileButton').setAttribute('disabled', 'disabled');
         document.getElementById('CertListBox').setAttribute('disabled', 'disabled');
         document.getElementById('SignBtn').setAttribute('disabled', 'disabled');
+
         cadesplugin.then(function () {
                 document.getElementById('openFileButton').removeAttribute('disabled');
                 document.getElementById('CertListBox').removeAttribute('disabled');

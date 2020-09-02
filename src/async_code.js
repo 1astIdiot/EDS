@@ -870,13 +870,12 @@ function FillCertInfo_Async(certificate, certBoxId, isFromContainer)
     var field_prefix;
     if(typeof(certBoxId) == 'undefined' || certBoxId == "CertListBox")
     {
-        alert('KekAsync');
         BoxId = 'cert_info';
         field_prefix = '';
-    }else if (certBoxId == "CertListBox1") {
+    }else if (certBoxId === "CertListBox1") {
         BoxId = 'cert_info1';
         field_prefix = 'cert_info1';
-    } else if (certBoxId == "CertListBox2") {
+    } else if (certBoxId === "CertListBox2") {
         BoxId = 'cert_info2';
         field_prefix = 'cert_info2';
     } else {
@@ -961,7 +960,7 @@ function Encrypt_Async() {
 
         //Get First certificate
         var e = document.getElementById('CertListBox1');
-        if (e.selectedIndex == -1) {
+        if (e.selectedIndex === -1) {
             alert("Select first certificate");
             return;
         }
@@ -970,7 +969,7 @@ function Encrypt_Async() {
 
         //Get second Certificate
         var e = document.getElementById('CertListBox2');
-        if (e.selectedIndex == -1) {
+        if (e.selectedIndex === -1) {
             alert("Select second certificate");
             return;
         }

@@ -32,7 +32,6 @@ async function sendSig(sig, name) {
         return response.text();
     }
     catch(error) {
-        console.log(error);
         return Promise.reject(error);
     }
 }

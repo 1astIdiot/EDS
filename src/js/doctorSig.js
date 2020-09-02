@@ -8,7 +8,6 @@ function doctorSig(attr) {
     else
         if ('' === fileContent[0])
         {
-            console.log(fileContent);
             alert('Выбран пустой файл');
             return;
         }
